@@ -28,7 +28,7 @@ public class HibernateConfig {
     */
 
     //hiroku
-    private final String dbUrl = "jdbc:postgresql://pragasinetdiej:711f550315ca3d32e1decd0b42b7239b3f94079ad0a7ddb70a59616847142a5e@ec2-54-217-208-52.eu-west-1.compute.amazonaws.com:5432/d8i30hqsab72ta";
+    private final String dbUrl = "jdbc:postgresql://ec2-54-217-208-52.eu-west-1.compute.amazonaws.com:5432/d8i30hqsab72ta";
     private final String dbUsername = "pragasinetdiej";
     private final String dbPassword = "711f550315ca3d32e1decd0b42b7239b3f94079ad0a7ddb70a59616847142a5e";
 
