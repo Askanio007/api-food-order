@@ -21,11 +21,11 @@ public class HibernateConfig {
     private final String dbPassword = "eew9jaekuamiePeibo6x";
     */
 
-    /*local
-    private final String dbUrl = "jdbc:postgresql://localhost:5432/food_order";
+    //local
+    /*private final String dbUrl = "jdbc:postgresql://localhost:5432/food_order";
     private final String dbUsername = "postgres";
-    private final String dbPassword = "12332155";
-    */
+    private final String dbPassword = "12332155";*/
+
 
     //hiroku
     private final String dbUrl = "jdbc:postgresql://ec2-54-217-208-52.eu-west-1.compute.amazonaws.com:5432/d8i30hqsab72ta";

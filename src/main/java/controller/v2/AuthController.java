@@ -20,6 +20,8 @@ import service.UserService;
 import utils.EncryptingString;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v2")
@@ -44,7 +46,7 @@ public class AuthController {
             if (EncryptingString.getEncoder().matches(password, u.getPassword())) {
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Authorization", TokenUtil.generateToken(u));
-                return new ResponseEntity<>(new ResponseServer(true, userService.find(login)), headers, HttpStatus.OK);
+                return new ResponseEntity<>(new ResponseServer(true, "login successful", userService.find(login)), headers, HttpStatus.OK);
             }
         }
         return ResponseServer.OK(false, "Not allowed", "Incorrect password or login");
@@ -54,13 +56,13 @@ public class AuthController {
     @RequestMapping(value = "/registration", method = RequestMethod.POST, produces={"application/json; charset=UTF-8"})
     public ResponseEntity<ResponseServer> registration(@RequestBody @Valid UserDto userDto, BindingResult result) {
         if (result.hasErrors())
-            return ResponseServer.OK(false,"Incorrect password or login");
+            return ResponseServer.OK(false, "Registration error", "Incorrect password or login");
         if (userService.isLoginExist(userDto.getLogin()))
-            return ResponseServer.OK(false, "Login already exist");
+            return ResponseServer.OK(false, "Registration error", "Login already exist");
         if (!userDto.getLogin().matches("[A-Za-z0-9]{1,}"))
-            return ResponseServer.OK(false, "Incorrect login");
+            return ResponseServer.OK(false, "Registration error", "Incorrect login");
         userService.createUser(userDto);
-        return ResponseServer.OK(false, "Request for registration was sent. Please contact the administrator");
+        return ResponseServer.OK(true, "Request for registration was sent. Please contact the administrator", userService.find(userDto.getLogin()));
     }
 
 }

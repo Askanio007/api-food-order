@@ -15,12 +15,24 @@ public class ResponseServer {
 
     private boolean success;
     private List errors = new ArrayList();
+    private String message;
     private Object data;
 
-    public ResponseServer(boolean success, Object data, List errors) {
+    public ResponseServer(boolean success, String message, Object data, List errors) {
         this.success = success;
         this.data = data;
         this.errors = errors;
+    }
+
+    public ResponseServer(boolean success, String message, Object data) {
+        this.success = success;
+        this.data = data;
+        this.message = message;
+    }
+
+    public ResponseServer(boolean success, String message) {
+        this.success = success;
+        this.message = message;
     }
 
     public ResponseServer(boolean success, Object data) {
@@ -28,12 +40,20 @@ public class ResponseServer {
         this.data = data;
     }
 
-    public static ResponseEntity<ResponseServer> OK(boolean success, Object data, List errors) {
-        return new ResponseEntity<>(new ResponseServer(success, data, errors), HttpStatus.OK);
+    public static ResponseEntity<ResponseServer> OK(boolean success, String message, Object data, List errors) {
+        return new ResponseEntity<>(new ResponseServer(success, message, data, errors), HttpStatus.OK);
     }
 
-    public static ResponseEntity<ResponseServer> OK(boolean success, Object data, String error) {
-        return new ResponseEntity<>(new ResponseServer(success, data, Arrays.asList(error)), HttpStatus.OK);
+    public static ResponseEntity<ResponseServer> OK(boolean success, String message, Object data, String error) {
+        return new ResponseEntity<>(new ResponseServer(success, message, data, Arrays.asList(error)), HttpStatus.OK);
+    }
+
+    public static ResponseEntity<ResponseServer> OK(boolean success, String message, Object data) {
+        return new ResponseEntity<>(new ResponseServer(success, message, data), HttpStatus.OK);
+    }
+
+    public static ResponseEntity<ResponseServer> OK(boolean success, String message) {
+        return new ResponseEntity<>(new ResponseServer(success, message), HttpStatus.OK);
     }
 
     public static ResponseEntity<ResponseServer> OK(boolean success, Object data) {
