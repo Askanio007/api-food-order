@@ -1,5 +1,7 @@
 package models.responseServer;
 
+import config.securityConfig.TokenUtil;
+import dto.UserDto;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
@@ -14,6 +16,7 @@ import java.util.List;
 public class ResponseServer {
 
     private boolean success;
+    private String token;
     private List errors = new ArrayList();
     private String message;
     private Object data;
@@ -22,6 +25,14 @@ public class ResponseServer {
         this.success = success;
         this.data = data;
         this.errors = errors;
+        this.message = message;
+    }
+
+    public ResponseServer(boolean success, String message, Object data, String token) {
+        this.success = success;
+        this.message = message;
+        this.data = data;
+        this.token = token;
     }
 
     public ResponseServer(boolean success, String message, Object data) {
@@ -62,6 +73,10 @@ public class ResponseServer {
 
     public static ResponseEntity<ResponseServer> unauthorized(String error) {
         return new ResponseEntity<>(new ResponseServer(false, null, Arrays.asList(error)), HttpStatus.UNAUTHORIZED);
+    }
+
+    public static ResponseEntity<ResponseServer> authorized(UserDto user) {
+        return new ResponseEntity<>(new ResponseServer(true, "login successful", user, TokenUtil.generateToken(user)), HttpStatus.OK);
     }
 
 }

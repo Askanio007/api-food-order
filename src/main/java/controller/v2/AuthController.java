@@ -1,15 +1,10 @@
 package controller.v2;
 
-import config.securityConfig.TokenUtil;
 import dto.UserDto;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import models.responseServer.ResponseServer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,8 +15,6 @@ import service.UserService;
 import utils.EncryptingString;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v2")
@@ -44,9 +37,7 @@ public class AuthController {
             if (!u.isEnable())
                 return ResponseServer.OK(false, "Not allowed", "User is not active");
             if (EncryptingString.getEncoder().matches(password, u.getPassword())) {
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Authorization", TokenUtil.generateToken(u));
-                return new ResponseEntity<>(new ResponseServer(true, "login successful", userService.find(login)), headers, HttpStatus.OK);
+                return ResponseServer.authorized(userService.find(login));
             }
         }
         return ResponseServer.OK(false, "Not allowed", "Incorrect password or login");
