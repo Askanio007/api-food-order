@@ -69,6 +69,8 @@ public class CustomerController {
     public ResponseEntity<String> addOrder(@RequestBody List<FoodDto> foods)  {
         if (menuService.statusOrder() == StatusOrder.WAITING_DELIVERY)
             return new ResponseEntity<>("menu was accepted. Create order is forbidden", HttpStatus.OK);
+        if (orderService.findToday(getCurrentUserName()) != null)
+            return new ResponseEntity<>("order already exist", HttpStatus.OK);
         orderService.save(foods, getCurrentUserName());
         return new ResponseEntity<>("order was created", HttpStatus.CREATED);
     }

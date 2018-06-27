@@ -130,6 +130,8 @@ public class CustomerControllerV2 {
     public ResponseEntity<ResponseServer> addOrder(@RequestBody List<FoodDto> foods)  {
         if (menuService.statusOrder() == StatusOrder.WAITING_DELIVERY)
             return ResponseServer.OK(false, "menu was accepted. Create order is forbidden");
+        if (orderService.findToday(getCurrentUserLogin()) != null)
+            return ResponseServer.OK(false, "order already exist");
         orderService.save(foods, getCurrentUserLogin());
         return ResponseServer.OK(true, "order was created");
     }
