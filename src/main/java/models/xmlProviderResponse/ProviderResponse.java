@@ -17,5 +17,4 @@ public class ProviderResponse {
     @XmlElement(name = "Order", namespace = "www.fast-operator.ru")
     private InformationOrder order;
 
-
 }

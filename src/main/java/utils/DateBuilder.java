@@ -51,12 +51,6 @@ public class DateBuilder {
         return startDay(calendar.getTime());
     }
 
-    public static Date firstDayCurrentMonth() {
-        Calendar calendar = getCurrentTime();
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
-        return calendar.getTime();
-    }
-
     public static Date getTenMinutesBeforeOrder(Date dateAcceptOrder) {
         Calendar calendar = getCurrentTime();
         calendar.setTime(dateAcceptOrder);
@@ -71,44 +65,64 @@ public class DateBuilder {
         return calendar.getTime();
     }
 
-    public static Date firstDayLastCashPeriod() {
+    public static Date firstDayLastCashPeriod(int day) {
         Calendar calendar = getCurrentTime();
-        if (calendar.get(Calendar.DAY_OF_MONTH) < 21) {
+        if (calendar.get(Calendar.DAY_OF_MONTH) < day) {
             calendar.add(Calendar.MONTH, -2);
         } else {
             calendar.add(Calendar.MONTH, -1);
         }
-        calendar.set(Calendar.DAY_OF_MONTH, 21);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
         return startDay(calendar.getTime());
     }
 
-    public static Date lastDayLastCashPeriod() {
+    public static Date lastDayLastCashPeriod(int day) {
         Calendar calendar = getCurrentTime();
-        if (calendar.get(Calendar.DAY_OF_MONTH) < 21)
+        if (calendar.get(Calendar.DAY_OF_MONTH) < day)
             calendar.add(Calendar.MONTH, -1);
-        calendar.set(Calendar.DAY_OF_MONTH, 21);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
         return startDay(calendar.getTime());
     }
 
-    public static Date firstDayCurrentCashPeriod() {
+    public static Date firstDayCurrentCashPeriod(int day) {
         Calendar calendar = getCurrentTime();
-        if (calendar.get(Calendar.DAY_OF_MONTH) < 21) {
+        if (calendar.get(Calendar.DAY_OF_MONTH) < day) {
             calendar.add(Calendar.MONTH, -1);
         }
-        calendar.set(Calendar.DAY_OF_MONTH, 21);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
         return startDay(calendar.getTime());
     }
 
-    public static Date lastDayCurrentCashPeriod() {
+    public static Date lastDayCurrentCashPeriod(int day) {
         Calendar calendar = getCurrentTime();
-        if (calendar.get(Calendar.DAY_OF_MONTH) >= 21) {
+        if (calendar.get(Calendar.DAY_OF_MONTH) >= day) {
             calendar.add(Calendar.MONTH, 1);
         }
-        calendar.set(Calendar.DAY_OF_MONTH, 21);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
         return startDay(calendar.getTime());
+    }
+
+    public static DateFilter nextCashPeriod(int day, Calendar calendar) {
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        Date date1 = calendar.getTime();
+        calendar.add(Calendar.MONTH, 1);
+        Date date2 = calendar.getTime();
+        return new DateFilter(date1, date2);
+    }
+
+    public static DateFilter prevCashPeriod(int day, Calendar calendar) {
+        calendar.set(Calendar.DAY_OF_MONTH, day);
+        Date date2 = calendar.getTime();
+        calendar.add(Calendar.MONTH, - 1);
+        Date date1 = calendar.getTime();
+        return new DateFilter(date1, date2);
     }
 
     public static Date today() {
         return (Date)getCurrentTime().getTime().clone();
+    }
+
+    public static int todayDay() {
+        return getCurrentTime().get(Calendar.DAY_OF_MONTH);
     }
 }

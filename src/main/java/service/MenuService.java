@@ -86,7 +86,7 @@ public class MenuService {
             scheduler.schedule(sendOrderInFoodProvider, menuDto.getDateAcceptOrderD());
             scheduler.schedule(notifyAboutOrder, DateBuilder.getTenMinutesBeforeOrder(menuDto.getDateAcceptOrderD()));
             scheduler.schedule(notifyAboutMenu, DateBuilder.addOneMinutes(today()));
-            orderService.createAutoOrder();
+            //orderService.createAutoOrder();
             log.info("Task was created. Menu send in " + menuDto.getDateAcceptOrderD().toString());
         } catch (Exception e) {
             log.error("create menu and task send order is failed!", e);

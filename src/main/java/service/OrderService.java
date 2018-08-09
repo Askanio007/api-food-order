@@ -2,12 +2,9 @@ package service;
 
 import dao.CompletedOrderDao;
 import dao.OrderDao;
-import dto.AutoOrderDto;
 import dto.FoodDto;
-import dto.MenuDto;
 import dto.OrderDto;
 import entity.*;
-import enums.FoodType;
 import models.Product;
 import models.xmlOrder.Address;
 import models.xmlOrder.Phone;
@@ -54,8 +51,18 @@ public class OrderService {
     @Autowired
     private TransactionService transactionService;
 
+    @Autowired
+    private FoodTypeService foodTypeService;
+
+    @Autowired
+    private ReportService reportService;
+
     private BigDecimal calculatePrice(Collection<Food> foods) {
         return foods.stream().map(Food::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal calculatePriceOrder(Collection<FoodDto> foods) {
+        return foods.stream().map(FoodDto::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     @Transactional
@@ -99,9 +106,7 @@ public class OrderService {
     @Transactional
     public void acceptingTodayOrder() {
         try {
-            BigDecimal sumMenuFood = orderDao.amountMoneyTodayOrders();
-            BigDecimal sumOtherFood = orderDao.amountMoneyTodayOtherOrders();
-            BigDecimal sumOrder = sumMenuFood.add(sumOtherFood);
+            BigDecimal sumOrder = sumTodayOrder();
             List<Order> orders = findToday();
             orders.forEach(order -> {
                 order.setAccept(true);
@@ -109,9 +114,9 @@ public class OrderService {
                 CompletedOrder completedOrder = new CompletedOrder(order);
                 completedOrder.setItems(CompletedOrderItem.createItem(order.getFoods(), completedOrder));
                 completedOrderDao.save(completedOrder);
+                userService.updateUserBalance(order.getUser(), calculatePrice(order.getFoods()));
                 orderDao.update(order);
             });
-
             transactionService.paymentTransaction(sumOrder);
         } catch (Exception e) {
             log.error("update orders or update balance is failed", e);
@@ -120,8 +125,8 @@ public class OrderService {
 
     @Transactional
     protected BigDecimal sumTodayOrder() {
-        BigDecimal sumMenuFood = orderDao.amountMoneyTodayOrders();
-        BigDecimal sumOtherFood = orderDao.amountMoneyTodayOtherOrders();
+        BigDecimal sumMenuFood = orderDao.amountMoneyTodayOrders(foodTypeService.listComboTypes());
+        BigDecimal sumOtherFood = orderDao.amountMoneyTodayOrders(foodTypeService.listPermanentTypes());
         BigDecimal sumOrder = sumMenuFood.add(sumOtherFood);
         return sumOrder;
     }
@@ -147,29 +152,8 @@ public class OrderService {
     }
 
     @Transactional
-    public List<OrderDto> findByDate(DateFilter filter, PaginationFilter paginationFilter) {
-        return findByDate(filter, null, paginationFilter);
-    }
-
-    @Transactional
-    public List<OrderDto> findByDate(DateFilter filter, String login, PaginationFilter paginationFilter) {
-        List<Order> orders = orderDao.findByDate(filter.getFrom(), filter.getTo(), login, paginationFilter);
-        return orders != null ? OrderDto.convertToDto(orders) : null;
-    }
-
-    @Transactional
-    public long countOrderByDate(DateFilter filter, String login) {
-        return orderDao.countOrderByDate(filter.getFrom(), filter.getTo(), login);
-    }
-
-    @Transactional
-    public long countOrderByDate(DateFilter filter) {
-        return countOrderByDate(filter, null);
-    }
-
-    @Transactional
     public BigDecimal lastPeriodBalance(String userLogin) {
-        DateFilter dateFilter = DateFilter.lastCashPeriod();
+        DateFilter dateFilter = reportService.lastCashPeriod();
         return orderDao.amountMoneySumOrders(userLogin, dateFilter.getFrom(), dateFilter.getTo());
     }
 
@@ -195,6 +179,40 @@ public class OrderService {
         return orderDao.sumTodayOrder(name);
     }
 
+    @Transactional
+    public void deleteOrder(String login) {
+        Order order = orderDao.findToday(login);
+        order.getFoods().forEach(foodDto -> {
+            Food food = foodService.find(foodDto.getId());
+            food.getOrders().remove(order);
+            foodService.updateFood(food);
+        });
+        order.getFoods().clear();
+        orderDao.delete(order.getId());
+    }
+
+    @Transactional
+    public XMLOrder generateXmlOrder() {
+        XMLOrder order = new XMLOrder(countTodayOrder(), getXMLTodayProducts());
+        order.setAddress(new Address(settingService.getCity(), settingService.getStreet(), settingService.getHouse(), settingService.getFlat(), settingService.getFloor()));
+        order.setPhone(new Phone(settingService.getPhone()));
+        return order;
+    }
+
+    @Transactional
+    public void deleteFoodFromOrder(Food food) {
+        List<Order> orders = orderDao.orderByFood(food.getId());
+        orders.forEach(order -> {
+            order.getFoods().remove(food);
+            if (order.getFoods().isEmpty())
+                orderDao.delete(order.getId());
+            else
+                orderDao.update(order);
+        });
+    }
+
+    /* Сказали убрать, пока не удаляю
+     *
     public void createAutoOrder() {
         List<AutoOrderDto> autoOrders = userService.listAutoOrder();
         MenuDto menu = menuService.getTodayMenu();
@@ -248,36 +266,6 @@ public class OrderService {
         });
         return l;
     }
-
-    @Transactional
-    public void deleteOrder(String login) {
-        Order order = orderDao.findToday(login);
-        order.getFoods().forEach(foodDto -> {
-            Food food = foodService.find(foodDto.getId());
-            food.getOrders().remove(order);
-            foodService.updateFood(food);
-        });
-        order.getFoods().clear();
-        orderDao.delete(order.getId());
-    }
-
-    @Transactional
-    public XMLOrder generateXmlOrder() {
-        XMLOrder order = new XMLOrder(countTodayOrder(), getXMLTodayProducts());
-        order.setAddress(new Address(settingService.getCity(), settingService.getStreet(), settingService.getHouse(), settingService.getFlat(), settingService.getFloor()));
-        order.setPhone(new Phone(settingService.getPhone()));
-        return order;
-    }
-
-    @Transactional
-    public void deleteFoodFromOrder(Food food) {
-        List<Order> orders = orderDao.orderByFood(food.getId());
-        orders.forEach(order -> {
-            order.getFoods().remove(food);
-            if (order.getFoods().isEmpty())
-                orderDao.delete(order.getId());
-            else
-                orderDao.update(order);
-        });
-    }
+    *
+    * */
 }

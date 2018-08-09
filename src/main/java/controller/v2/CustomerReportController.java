@@ -28,46 +28,6 @@ public class CustomerReportController {
     @Autowired
     private ReportService reportService;
 
-    @Autowired
-    private OrderService orderService;
-
-    //report
-    @ApiOperation(value = "[Не используется] Сумма заказа по дням ")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/orderByDate", method = RequestMethod.GET)
-    public ResponseEntity<ResponseServer> bySumOrderForUser() {
-        return ResponseServer.OK(true, reportService.getOrderPriceByDate(DateFilter.currentCashPeriod(), getCurrentUserLogin(), PaginationFilter.defaultPagination()));
-    }
-
-    @ApiOperation(value = "[Не используется] Сумма заказа по дням")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/orderByDate", method = RequestMethod.POST)
-    public ResponseEntity<ResponseServer> bySumOrderForUser(@RequestBody ReportFilters reportFilters) {
-        return ResponseServer.OK(true, reportService.getOrderPriceByDate(DateFilter.generateDateFilter(reportFilters), getCurrentUserLogin(), reportFilters.getPaginationFilter()));
-    }
-
-    @ApiOperation(value = "[Не используется] Детальная информация по заказу")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/detailOrder", method = RequestMethod.GET)
-    public ResponseEntity<ResponseServer> detailByOrderForUser() {
-        return ResponseServer.OK(true, orderService.findByDate(DateFilter.currentCashPeriod(), getCurrentUserLogin(), PaginationFilter.defaultPagination()));
-    }
-
-    @ApiOperation(value = "[Не используется] Детальная информация по заказу")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/detailOrder", method = RequestMethod.POST)
-    public ResponseEntity<ResponseServer> detailByOrderForUser(@RequestBody ReportFilters reportFilters) {
-        return ResponseServer.OK(true, orderService.findByDate(DateFilter.generateDateFilter(reportFilters), getCurrentUserLogin(), reportFilters.getPaginationFilter()));
-    }
-
     // Main page
 
     @ApiOperation(value = "Сумма расходов по типу блюда за текущий отчётный период")

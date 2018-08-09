@@ -8,11 +8,13 @@ import enums.RoleType;
 import models.reports.ReportByTodayOrder;
 import models.filters.ReportFilters;
 import models.reports.ReportUserByMoney;
+import org.apache.log4j.Logger;
 import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import utils.DateFilter;
+import utils.EncryptingString;
 import utils.PaginationFilter;
 
 import javax.transaction.Transactional;
@@ -22,6 +24,8 @@ import java.util.List;
 
 @Service
 public class UserService {
+
+    private static final Logger log = Logger.getLogger(UserService.class);
 
     private final String USER_WITH_BALANCE = "admin";
 
@@ -37,6 +41,12 @@ public class UserService {
 
     @Autowired
     private MenuService menuService;
+
+    @Autowired
+    private SettingService settingService;
+
+    @Autowired
+    private ReportService reportService;
 
     @Transactional
     public List<ReportByTodayOrder> getReportByTodayOrder() {
@@ -72,6 +82,7 @@ public class UserService {
         Role role = roleService.getRole(RoleType.ROLE_USER.getId());
         if (userDto.getRole() != null)
             role = roleService.getRole(userDto.getRole().getId());
+        userDto.setBalance(settingService.getUserBalance());
         User user = new User(userDto, role);
         userDao.save(user);
     }
@@ -127,7 +138,7 @@ public class UserService {
 
     @Transactional
     public List<ReportUserByMoney> customerByMoney(ReportFilters reportFilters) {
-        DateFilter dateFilter = DateFilter.currentCashPeriod();
+        DateFilter dateFilter = reportService.defaultCashPeriod();
         if (reportFilters.getFrom() != null || reportFilters.getTo() != null)
             dateFilter = DateFilter.generateDateFilter(reportFilters);
         return userDao.find(dateFilter.getFrom(), dateFilter.getTo(), reportFilters.getPaginationFilter(), reportFilters.getName());
@@ -159,7 +170,7 @@ public class UserService {
 
     @Transactional
     public BigDecimal amountSumCustomerByMoney(ReportFilters reportFilters) {
-        DateFilter dateFilter = DateFilter.currentCashPeriod();
+        DateFilter dateFilter = reportService.defaultCashPeriod();
         if (reportFilters.getFrom() != null || reportFilters.getTo() != null)
             dateFilter = DateFilter.generateDateFilter(reportFilters);
         return userDao.amountSumCustomerByMoney(dateFilter.getFrom(), dateFilter.getTo(), reportFilters.getName());
@@ -262,6 +273,31 @@ public class UserService {
     public void activatedUser(long id) {
         User user = get(id);
         user.setEnabled(true);
+        userDao.update(user);
+    }
+
+    @Transactional
+    public void updateUserBalance(User user, BigDecimal price) {
+        BigDecimal newBalance = user.getBalance().subtract(price);
+        user.setBalance(newBalance);
+        userDao.update(user);
+    }
+
+    @Transactional
+    public void updateUserBalance() {
+        try {
+            log.info("Start update...");
+            userDao.updateUserBalance(settingService.getUserBalance(), roleService.getRole(RoleType.ROLE_USER.getId()));
+            log.info("Complete update user balance!");
+        } catch (Exception e) {
+            log.error("Update balance is failed", e);
+        }
+    }
+
+    @Transactional
+    public void changePassword(long idUser, String newPassword) {
+        User user = get(idUser);
+        user.setPassword(EncryptingString.getEncoder().encode(newPassword));
         userDao.update(user);
     }
 }

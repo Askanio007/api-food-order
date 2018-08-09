@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 
-@Entity
+@Entity(name = "CompletedOrder")
 @Table(name = "order_completed")
 @Getter
 @Setter
@@ -33,10 +33,11 @@ public class CompletedOrder {
     @Column(name = "price")
     private BigDecimal price;
 
-    @Column(name = "user_id")
-    private Long idUser;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @OneToMany(mappedBy = "completedOrder", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "completedOrder", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Collection<CompletedOrderItem> items;
 
     public CompletedOrder(Order order) {
@@ -44,7 +45,7 @@ public class CompletedOrder {
         this.dateDeliveredOrder = order.getDateDeliveredOrder();
         this.dateOrder = order.getDateOrder();
         this.price = order.getPrice();
-        this.idUser = order.getUser().getId();
+        this.user = order.getUser();
     }
 
     protected CompletedOrder() {

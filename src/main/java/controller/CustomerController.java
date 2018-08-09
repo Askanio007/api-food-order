@@ -7,6 +7,7 @@ import converter.MoneyToString;
 import dto.AutoOrderDto;
 import dto.FoodDto;
 import dto.OrderDto;
+import dto.UserDto;
 import enums.StatusOrder;
 import models.filters.ReportFilters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,10 +59,14 @@ public class CustomerController {
         return MONEY_LIMIT_OF_MONTH.toString();
     }
 
+    @RequestMapping(value = "/rest/customer/balance", method = RequestMethod.GET, produces={"application/json; charset=UTF-8"})
+    public String userBalance() {
+        UserDto user = userService.find(getCurrentUserName());
+        return user.getBalance().toString();
+    }
+
     @RequestMapping(value = "/rest/customer/getFoodsByType", method = RequestMethod.POST, produces={"application/json; charset=UTF-8"})
     public List<FoodDto> foodByTypes(@RequestBody String type) {
-        if (menuService.todayMenuIsActive())
-            return FoodDto.listByType(menuService.getTodayMenu().getFoods(), type);
         return foodService.findAvailable(type);
     }
 
@@ -71,6 +76,9 @@ public class CustomerController {
             return new ResponseEntity<>("menu was accepted. Create order is forbidden", HttpStatus.OK);
         if (orderService.findToday(getCurrentUserName()) != null)
             return new ResponseEntity<>("order already exist", HttpStatus.OK);
+        UserDto user = userService.find(getCurrentUserName());
+        if (orderService.calculatePriceOrder(foods).compareTo(user.getBalance()) > 0)
+            return new ResponseEntity<>("not enough money", HttpStatus.OK);
         orderService.save(foods, getCurrentUserName());
         return new ResponseEntity<>("order was created", HttpStatus.CREATED);
     }
@@ -79,6 +87,9 @@ public class CustomerController {
     public ResponseEntity<AnswerServer> editOrder(@RequestBody List<FoodDto> foods) {
         if (menuService.statusOrder() == StatusOrder.WAITING_DELIVERY)
             return new ResponseEntity<>(new SuccessAnswer(HttpStatus.OK, "menu was accepted. Edit order is forbidden"), HttpStatus.OK);
+        UserDto user = userService.find(getCurrentUserName());
+        if (orderService.calculatePriceOrder(foods).compareTo(user.getBalance()) > 0)
+            return new ResponseEntity<>(new SuccessAnswer(HttpStatus.OK, "not enough money"), HttpStatus.OK);
         orderService.update(foods, getCurrentUserName());
         return new ResponseEntity<>(new SuccessAnswer(HttpStatus.CREATED, "order was edited"), HttpStatus.CREATED);
     }

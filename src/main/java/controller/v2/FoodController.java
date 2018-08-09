@@ -23,17 +23,12 @@ public class FoodController {
     @Autowired
     private FoodService foodService;
 
-    @Autowired
-    private MenuService menuService;
-
     @ApiOperation(value = "Блюда по заданному типу")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
     @RequestMapping(value = "/byType", method = RequestMethod.POST, produces={"application/json; charset=UTF-8"})
     public ResponseEntity<ResponseServer> foodByTypes(@RequestBody String type) {
-        if (menuService.todayMenuIsActive())
-            return ResponseServer.OK(true, FoodDto.listByType(menuService.getTodayMenu().getFoods(), type));
         return ResponseServer.OK(true, foodService.findAvailable(type));
     }
 

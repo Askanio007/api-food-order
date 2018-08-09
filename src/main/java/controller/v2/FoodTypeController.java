@@ -22,13 +22,22 @@ public class FoodTypeController {
     @Autowired
     private FoodTypeService foodTypeService;
 
-    @ApiOperation(value = "Все типы")
+    @ApiOperation(value = "Все типы (строками)")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public ResponseEntity<ResponseServer> getAllTypes() {
         return ResponseServer.OK(true, foodTypeService.getAllTypes());
+    }
+
+    @ApiOperation(value = "Все типы (объектами)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
+    })
+    @RequestMapping(value = "/allDto", method = RequestMethod.GET)
+    public ResponseEntity<ResponseServer> getAllTypesDto() {
+        return ResponseServer.OK(true, foodTypeService.getAllFoodTypesDto());
     }
 
     @ApiOperation(value = "Доступные типы на этом этапе заказа")

@@ -1,5 +1,6 @@
 package dao;
 
+import entity.CompletedOrderItem;
 import entity.Food;
 import org.springframework.stereotype.Repository;
 
@@ -9,11 +10,11 @@ import java.util.List;
 @Repository("foodDao")
 public class FoodDAOImpl extends GenericDAOImpl<Food> implements FoodDao {
 
-    public List<Food> findById(long orderId) {
-        Object foods = createQuery("select f from Food as f join f.orders as o where o.id = :id ")
+    public List<CompletedOrderItem> findById(long orderId) {
+        Object foods = createQuery("select f from CompletedOrderItem as f join f.completedOrder as o where o.id = :id ")
                 .setParameter("id", orderId)
                 .list();
-        return (List<Food>) foods;
+        return (List<CompletedOrderItem>) foods;
     }
 
     @Override
@@ -26,8 +27,8 @@ public class FoodDAOImpl extends GenericDAOImpl<Food> implements FoodDao {
 
     @Override
     public List<Food> findOther() {
-        Object foods = createQuery("select f from Food as f join f.type as type where type.type = :type and f.active = true")
-                .setParameter("type", enums.FoodType.OTHER)
+        Object foods = createQuery("select f from Food as f join f.type as type where type.type not like :type and f.active = true")
+                .setParameter("type", "%COMBO%")
                 .list();
         return (List<Food>) foods;
     }
@@ -35,7 +36,7 @@ public class FoodDAOImpl extends GenericDAOImpl<Food> implements FoodDao {
     @Override
     public List<Food> findAvailable(String type) {
         Object foods = createQuery("select f from Food as f join f.type as type where type.type = :type and f.active = true and f.availableEveryDay = true")
-                .setParameter("type", enums.FoodType.getType(type))
+                .setParameter("type", type)
                 .list();
         return (List<Food>) foods;
     }

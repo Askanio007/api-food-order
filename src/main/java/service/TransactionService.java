@@ -34,8 +34,8 @@ public class TransactionService {
     private UserService userService;
 
     @Transactional
-    public void createTransactionTo(BigDecimal sum) {
-        Transaction tr = Transaction.createTransaction(sum, transactionStatusDao.find(TransactionStatus.SEND_TO_MM.getId()));
+    public void createTransactionTo(BigDecimal sum, String comment) {
+        Transaction tr = Transaction.createTransaction(sum, transactionStatusDao.find(TransactionStatus.SEND_TO_MM.getId()), comment);
         transactionDao.save(tr);
     }
 
@@ -56,7 +56,7 @@ public class TransactionService {
     public void paymentTransaction(BigDecimal sum) {
         try {
             userService.withdrawMoney(sum);
-            Transaction tr = Transaction.createTransaction(sum, transactionStatusDao.find(TransactionStatus.PAYMENT_ORDER.getId()));
+            Transaction tr = Transaction.createTransaction(sum, transactionStatusDao.find(TransactionStatus.PAYMENT_ORDER.getId()), "Оплата заказа");
             transactionDao.save(tr);
         } catch (Exception e) {
             log.error("create transaction or update balance is failed!", e);

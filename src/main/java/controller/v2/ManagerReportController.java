@@ -31,31 +31,16 @@ public class ManagerReportController {
 
 
     // Manager report
-    @ApiOperation(value = "Едоки по сумме потраченных денег за текущий период")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/customerByMoney", method = RequestMethod.GET)
-    public ResponseEntity<ResponseServer> customerByMoney() {
-        return ResponseServer.OK(true, userService.customerByMoney(new ReportFilters(PaginationFilter.defaultPagination())));
-    }
 
     @ApiOperation(value = "Едоки по сумме потраченных денег с учётом фильтров")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
     @RequestMapping(value = "/customerByMoney", method = RequestMethod.POST)
-    public ResponseEntity<ResponseServer> customerByMoney(@RequestBody ReportFilters reportFilters) {
+    public ResponseEntity<ResponseServer> customerByMoney(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return ResponseServer.OK(true, userService.customerByMoney(new ReportFilters(PaginationFilter.defaultPagination())));
         return ResponseServer.OK(true, userService.customerByMoney(reportFilters));
-    }
-
-    @ApiOperation(value = "Едоки по сумме потраченных денег за текущий период. Итоговая сумма")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/customerByMoney/sum", method = RequestMethod.GET)
-    public ResponseEntity<ResponseServer> amountSumCustomerByMoney() {
-        return ResponseServer.OK(true, MoneyToString.convert(userService.amountSumCustomerByMoney(new ReportFilters(PaginationFilter.defaultPagination()))));
     }
 
     @ApiOperation(value = "Едоки по сумме потраченных денег с учётом фильтров. Итоговая сумма")
@@ -63,7 +48,9 @@ public class ManagerReportController {
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
     @RequestMapping(value = "/customerByMoney/sum", method = RequestMethod.POST)
-    public ResponseEntity<ResponseServer> amountSumCustomerByMoney(@RequestBody ReportFilters reportFilters) {
+    public ResponseEntity<ResponseServer> amountSumCustomerByMoney(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return ResponseServer.OK(true, MoneyToString.convert(userService.amountSumCustomerByMoney(new ReportFilters(PaginationFilter.defaultPagination()))));
         return ResponseServer.OK(true, MoneyToString.convert(userService.amountSumCustomerByMoney(reportFilters)));
     }
 
@@ -93,7 +80,7 @@ public class ManagerReportController {
     })
     @RequestMapping(value = "/currentBySumOrder", method = RequestMethod.GET)
     public ResponseEntity<ResponseServer> currentBySumOrder() {
-        return ResponseServer.OK(true, reportService.getOrderPriceByDate(DateFilter.currentCashPeriod(), PaginationFilter.defaultPagination()));
+        return ResponseServer.OK(true, reportService.getOrderPriceByDate(reportService.defaultCashPeriod(), PaginationFilter.defaultPagination()));
     }
 
     @ApiOperation(value = "Сумма затрат по каждому дню за текущий период. Итоговая сумма")

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -25,6 +26,8 @@ public class SettingService {
     private final String FLAT = "flat";
     private final String PHONE = "phone";
     private final String API_URL = "api";
+    private final String USER_BALANCE = "userBalance";
+    private final String START_ACCOUNTING_PERIOD = "startAccountingPeriod";
 
     @Transactional
     protected Setting find(String name) {
@@ -69,6 +72,16 @@ public class SettingService {
     @Transactional
     public String getCity() {
         return findValue(CITY);
+    }
+
+    @Transactional
+    public BigDecimal getUserBalance() {
+        return new BigDecimal(findValue(USER_BALANCE));
+    }
+
+    @Transactional
+    public int getStartAccountingPeriod() {
+        return Integer.parseInt(findValue(START_ACCOUNTING_PERIOD));
     }
 
     @Transactional

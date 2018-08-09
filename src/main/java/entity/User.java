@@ -47,6 +47,9 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Collection<Device> devices;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Collection<CompletedOrder> completedOrders;
+
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private AutoOrder autoOrder;
 
@@ -58,7 +61,7 @@ public class User {
         this.password = EncryptingString.getEncoder().encode(userDto.getPassword());
         this.role = role;
         this.enabled = userDto.isEnable();
-        this.balance = BigDecimal.ZERO;
+        this.balance = userDto.getBalance();
         this.autoOrder = new AutoOrder();
     }
 }

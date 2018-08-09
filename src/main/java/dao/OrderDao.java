@@ -1,10 +1,12 @@
 package dao;
 
+import dto.FoodTypeDto;
 import entity.Order;
 import models.*;
 import models.reports.ReportByNameFood;
 import models.reports.ReportByTypeFood;
 import models.reports.ReportOrderPriceByDate;
+import utils.DateFilter;
 import utils.PaginationFilter;
 
 import java.math.BigDecimal;
@@ -23,17 +25,7 @@ public interface OrderDao extends GenericDao<Order> {
 
     BigDecimal sumTodayOrder(String name);
 
-    List<Order> findByDate(Date from, Date to, String login, PaginationFilter paginationFilter);
-
-    long countOrderByDate(Date from, Date to, String login);
-
-    List<ReportByTypeFood> getReportByTypeFood(String userLogin);
-
-    BigDecimal amountSumByTypeFood(String userLogin);
-
-    List<ReportByNameFood> getTodayReportByNameFood();
-
-    List<ReportByNameFood> getReportByNameFood(Date date);
+    List<ReportByNameFood> getTodayReportByNameFood(List<FoodTypeDto> listType);
 
     List<Product> getFullTodayOrder();
 
@@ -43,29 +35,9 @@ public interface OrderDao extends GenericDao<Order> {
 
     boolean todayOrdersAccept(Date dateAcceptingOrder);
 
-    List<ReportByNameFood> getTodayReportByTypeOtherFood();
-
-    List<ReportByNameFood> getReportByTypeOtherFood(Date date);
-
-    List<ReportOrderPriceByDate> getOrderPriceByDate(String userLogin, Date from, Date to, PaginationFilter paginationFilter);
-
-    long getCountOrderPriceByDate(String userLogin, Date from, Date to);
-
-    BigDecimal amountMoneySumOrders(Date from, Date to);
-
     BigDecimal amountMoneySumOrders(String login, Date from, Date to);
 
-    BigDecimal amountMoneyTodayOrders();
-
-    BigDecimal amountMoneyTodayOtherOrders();
-
-    BigDecimal amountMoneyOrders(Date date);
-
-    BigDecimal amountMoneyOtherOrders(Date date);
-
-    BigDecimal amountSumReportByTypeFood();
-
-    BigDecimal amountSumOrderPriceByDate();
+    BigDecimal amountMoneyTodayOrders(List<FoodTypeDto> listType);
 
     List<Order> orderByFood(long id);
 

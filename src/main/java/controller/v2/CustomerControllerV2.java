@@ -2,6 +2,7 @@ package controller.v2;
 
 import dto.AutoOrderDto;
 import dto.FoodDto;
+import dto.UserDto;
 import enums.StatusOrder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -132,6 +133,9 @@ public class CustomerControllerV2 {
             return ResponseServer.OK(false, "menu was accepted. Create order is forbidden");
         if (orderService.findToday(getCurrentUserLogin()) != null)
             return ResponseServer.OK(false, "order already exist");
+        UserDto user = userService.find(getCurrentUserLogin());
+        if (orderService.calculatePriceOrder(foods).compareTo(user.getBalance()) > 0)
+            return ResponseServer.OK(false, "not enough money");
         orderService.save(foods, getCurrentUserLogin());
         return ResponseServer.OK(true, "order was created");
     }
@@ -179,5 +183,15 @@ public class CustomerControllerV2 {
     public ResponseEntity<ResponseServer> saveName(@RequestBody String name) {
         userService.saveName(getCurrentUserLogin(), name);
         return ResponseServer.OK(true, "Name saved success");
+    }
+
+    @ApiOperation(value = "Текущий баланс")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
+    })
+    @RequestMapping(value = "/balance", method = RequestMethod.GET)
+    public ResponseEntity<ResponseServer> currentBalance() {
+        UserDto user = userService.find(getCurrentUserLogin());
+        return ResponseServer.OK(true, user.getBalance());
     }
 }

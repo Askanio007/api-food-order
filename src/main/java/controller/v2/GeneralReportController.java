@@ -28,8 +28,24 @@ public class GeneralReportController {
     @Autowired
     private ReportService reportService;
 
-    @Autowired
-    private OrderService orderService;
+
+    @ApiOperation(value = "Даты прошлого отчётного периода (относительно заданного месяца)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
+    })
+    @RequestMapping(value = "/prevCashPeriod", method = RequestMethod.POST)
+    public ResponseEntity<ResponseServer> prevCashPeriod(@RequestBody Date date) {
+        return ResponseServer.OK(true, reportService.getPrevCashPeriod(date));
+    }
+
+    @ApiOperation(value = "Даты следующего отчётного периода (относительно заданного месяца)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
+    })
+    @RequestMapping(value = "/nextCashPeriod", method = RequestMethod.POST)
+    public ResponseEntity<ResponseServer> nextCashPeriod(@RequestBody Date date) {
+        return ResponseServer.OK(true, reportService.getNextCashPeriod(date));
+    }
 
 
     @ApiOperation(value = "Даты текущего отчётного периода")
@@ -38,7 +54,7 @@ public class GeneralReportController {
     })
     @RequestMapping(value = "/defaultTimePeriod", method = RequestMethod.GET)
     public ResponseEntity<ResponseServer> defaultTimePeriod() {
-        return ResponseServer.OK(true, DateFilter.currentCashPeriod());
+        return ResponseServer.OK(true, reportService.defaultCashPeriod());
     }
 
     @ApiOperation(value = "Даты прошлого отчётного периода")
@@ -47,36 +63,21 @@ public class GeneralReportController {
     })
     @RequestMapping(value = "/lastTimePeriod", method = RequestMethod.GET)
     public ResponseEntity<ResponseServer> lastTimePeriod() {
-        return ResponseServer.OK(true, DateFilter.lastCashPeriod());
+        return ResponseServer.OK(true, reportService.lastCashPeriod());
     }
 
 
     //By Sum Orders
-    @ApiOperation(value = "Сумма заказов по дням за текущий период")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/bySumOrders", method = RequestMethod.GET)
-    public ResponseEntity<ResponseServer> bySumOrder() {
-        return ResponseServer.OK(true, reportService.getOrderPriceByDate(DateFilter.currentCashPeriod(), PaginationFilter.defaultPagination()));
-    }
 
     @ApiOperation(value = "Сумма заказов по дням с учётом фильтров")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
     @RequestMapping(value = "/bySumOrders", method = RequestMethod.POST)
-    public ResponseEntity<ResponseServer> bySumOrder(@RequestBody ReportFilters reportFilters) {
+    public ResponseEntity<ResponseServer> bySumOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return ResponseServer.OK(true, reportService.getOrderPriceByDate(reportService.defaultCashPeriod(), PaginationFilter.defaultPagination()));
         return ResponseServer.OK(true, reportService.getOrderPriceByDate(DateFilter.generateDateFilter(reportFilters), reportFilters.getPaginationFilter()));
-    }
-
-    @ApiOperation(value = "Сумма заказов по дням за текущий период. Количество записей")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/bySumOrders/count", method = RequestMethod.GET)
-    public ResponseEntity<ResponseServer> countBySumOrder() {
-        return ResponseServer.OK(true, reportService.getCountOrderPriceByDate(DateFilter.currentCashPeriod()));
     }
 
     @ApiOperation(value = "Сумма заказов по дням с учётом фильтров. Количество записей")
@@ -84,17 +85,10 @@ public class GeneralReportController {
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
     @RequestMapping(value = "/bySumOrders/count", method = RequestMethod.POST)
-    public ResponseEntity<ResponseServer> countBySumOrder(@RequestBody ReportFilters reportFilters) {
+    public ResponseEntity<ResponseServer> countBySumOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return ResponseServer.OK(true, reportService.getCountOrderPriceByDate(reportService.defaultCashPeriod()));
         return ResponseServer.OK(true, reportService.getCountOrderPriceByDate(DateFilter.generateDateFilter(reportFilters)));
-    }
-
-    @ApiOperation(value = "Сумма заказов по дням за текущий период. Итоговая сумма")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/bySumOrders/sum", method = RequestMethod.GET)
-    public ResponseEntity<ResponseServer> amountSumOrder() {
-        return ResponseServer.OK(true, MoneyToString.convert(reportService.getAmountOrderPriceByDate(DateFilter.currentCashPeriod())));
     }
 
     @ApiOperation(value = "Сумма заказов по дням с учётом фильтров. Итоговая сумма")
@@ -102,7 +96,9 @@ public class GeneralReportController {
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
     @RequestMapping(value = "/bySumOrders/sum", method = RequestMethod.POST)
-    public ResponseEntity<ResponseServer> amountSumOrder(@RequestBody ReportFilters reportFilters) {
+    public ResponseEntity<ResponseServer> amountSumOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return ResponseServer.OK(true, MoneyToString.convert(reportService.getAmountOrderPriceByDate(reportService.defaultCashPeriod())));
         return ResponseServer.OK(true, MoneyToString.convert(reportService.getAmountOrderPriceByDate(DateFilter.generateDateFilter(reportFilters))));
     }
 
@@ -145,31 +141,15 @@ public class GeneralReportController {
 
     //Detail By Order
 
-    @ApiOperation(value = "Количество заказов за текущий период")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/orders/count", method = RequestMethod.GET)
-    public ResponseEntity<ResponseServer> countDetailByOrder() {
-        return ResponseServer.OK(true, orderService.countOrderByDate(DateFilter.currentCashPeriod()));
-    }
-
     @ApiOperation(value = "Количество заказов с учётом фильтров")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
     @RequestMapping(value = "/orders/count", method = RequestMethod.POST)
-    public ResponseEntity<ResponseServer> countDetailByOrder(@RequestBody ReportFilters reportFilters) {
-        return ResponseServer.OK(true, orderService.countOrderByDate(DateFilter.generateDateFilter(reportFilters)));
-    }
-
-    @ApiOperation(value = "Список заказов за текущий период")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(value = "/orders", method = RequestMethod.GET)
-    public ResponseEntity<ResponseServer> DetailByOrder() {
-        return ResponseServer.OK(true, orderService.findByDate(DateFilter.currentCashPeriod(), PaginationFilter.defaultPagination()));
+    public ResponseEntity<ResponseServer> countDetailByOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return ResponseServer.OK(true, reportService.countOrderByDate(reportService.defaultCashPeriod()));
+        return ResponseServer.OK(true, reportService.countOrderByDate(DateFilter.generateDateFilter(reportFilters)));
     }
 
     @ApiOperation(value = "Список заказов с учётом фильтров")
@@ -177,8 +157,10 @@ public class GeneralReportController {
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
     @RequestMapping(value = "/orders", method = RequestMethod.POST)
-    public ResponseEntity<ResponseServer> DetailByOrder(@RequestBody ReportFilters reportFilters) {
-        return ResponseServer.OK(true, orderService.findByDate(DateFilter.generateDateFilter(reportFilters), reportFilters.getPaginationFilter()));
+    public ResponseEntity<ResponseServer> DetailByOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return ResponseServer.OK(true, reportService.findByDate(reportService.defaultCashPeriod(), PaginationFilter.defaultPagination()));
+        return ResponseServer.OK(true, reportService.findByDate(DateFilter.generateDateFilter(reportFilters), reportFilters.getPaginationFilter()));
     }
 
 }

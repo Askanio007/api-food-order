@@ -13,13 +13,16 @@ public class FoodTypeDto {
 
     private long id;
 
+    private boolean combo;
+
     private String type;
 
     private FoodTypeDto() {}
 
     private FoodTypeDto(FoodType fType) {
         this.id = fType.getId();
-        this.type =fType.getType().toString();
+        this.type =fType.getType();
+        this.combo = fType.isCombo();
     }
 
     public static FoodTypeDto convertToDto(FoodType fType) {
@@ -28,7 +31,7 @@ public class FoodTypeDto {
 
     public static List<String> convertToDto(List<FoodType> fTypes) {
         List<String> foodTypeDto = new ArrayList<>();
-        fTypes.forEach(foodType -> foodTypeDto.add(enums.FoodType.getType(foodType.getType())));
+        fTypes.forEach(foodType -> foodTypeDto.add(foodType.getType()));
         return foodTypeDto;
     }
 

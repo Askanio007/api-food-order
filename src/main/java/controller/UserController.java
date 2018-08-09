@@ -6,6 +6,7 @@ import config.answerServer.ErrorAnswer;
 import config.answerServer.SuccessAnswer;
 import dto.UserDto;
 import enums.StatusOrder;
+import models.Password;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 
@@ -87,5 +88,19 @@ public class UserController {
         userService.addAutoOrder();
         return "ok";
     }
+
+    @RequestMapping(value = "/rest/password/change", method = RequestMethod.POST, produces={"application/json; charset=UTF-8"})
+    public ResponseEntity<String> changePassword(@RequestBody @Valid Password password, BindingResult result) {
+        if(result.hasErrors()) {
+            return new ResponseEntity<>("Некорректный новый пароль", HttpStatus.BAD_REQUEST);
+        }
+        if (!password.getNewPassword().equals(password.getConfirmNewPassword())) {
+            return new ResponseEntity<>("Пароли не совпадают", HttpStatus.BAD_REQUEST);
+        }
+        userService.changePassword(password.getUserId(), password.getNewPassword());
+        return new ResponseEntity<>("Пароль успешно изменён", HttpStatus.OK);
+    }
+
+
 }
 

@@ -1,6 +1,8 @@
 package models.reports;
 
 import converter.MoneyToString;
+import dto.FoodTypeDto;
+import entity.FoodType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,7 +12,7 @@ import java.util.List;
 @Getter @Setter
 public class ReportByTypeFood {
 
-    private enums.FoodType type;
+    private String type;
 
     private long count;
 
@@ -18,13 +20,13 @@ public class ReportByTypeFood {
 
     public ReportByTypeFood() {}
 
-    public ReportByTypeFood(enums.FoodType type, long count, BigDecimal price) {
+    public ReportByTypeFood(String type, long count, BigDecimal price) {
         this.type = type;
         this.count = count;
         this.price = MoneyToString.convert(price);
     }
 
     public String getType() {
-        return enums.FoodType.getType(this.type);
+        return this.type;
     }
 }

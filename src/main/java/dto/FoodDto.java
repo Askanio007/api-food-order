@@ -2,14 +2,12 @@ package dto;
 
 import converter.MoneyToString;
 import entity.Food;
-import enums.FoodType;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Min;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -44,7 +42,7 @@ public class FoodDto {
     private FoodDto(Food food) {
         this.id = food.getId();
         this.name = food.getName();
-        this.type = FoodType.getType(food.getType().getType());
+        this.type = food.getType().getType();
         this.price = food.getPrice();
         this.priceView = MoneyToString.convert(food.getPrice());
         this.available = food.isAvailableEveryDay();

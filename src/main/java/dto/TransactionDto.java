@@ -33,6 +33,9 @@ public class TransactionDto {
 
     private String updateDate;
 
+    @NotNull
+    private String comment;
+
     private TransactionDto(Transaction tr) {
         this.id = tr.getId();
         this.status = tr.getStatus().getStatus().name();
@@ -41,6 +44,7 @@ public class TransactionDto {
         this.updateDate = DateConverter.getFormatView().format(tr.getUpdateDate());
         this.statusView = TransactionStatus.getStatus(tr.getStatus().getStatus());
         this.sumView = MoneyToString.convert(tr.getTransactionAmount());
+        this.comment = tr.getComment();
     }
 
     public static TransactionDto convertToDto(Transaction tr) {
@@ -54,6 +58,11 @@ public class TransactionDto {
     }
 
     public TransactionDto(BigDecimal sum) {
+        this.sum = sum;
+    }
+
+    public TransactionDto(BigDecimal sum, String comment) {
+        this.comment = comment;
         this.sum = sum;
     }
 

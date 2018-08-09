@@ -1,15 +1,15 @@
 package dao;
 
+import dto.FoodTypeDto;
+import entity.CompletedOrderItem;
 import entity.Food;
-import entity.FoodType;
 
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.List;
 
 public interface FoodDao extends GenericDao<Food> {
 
-    List<Food> findById(long orderId);
+    List<CompletedOrderItem> findById(long completedOrderId);
 
     List<Food> findActive();
 

@@ -60,7 +60,7 @@ public class UserDAOImpl extends GenericDAOImpl<User> implements UserDao {
         return list;
     }
 
-    private String USER_BY_MONEY_SUBQUERY = "select sum(o.price) from u.orders as o where u = o.user and o.accept = true and o.dateDeliveredOrder between :from and :to";
+    private String USER_BY_MONEY_SUBQUERY = "select sum(o.price) from u.completedOrders as o where u = o.user and o.dateDeliveredOrder between :from and :to";
     private String USER_BY_MONEY =
             "select " +
                 "u.id as id, u.login as login, u.name as name, (" + USER_BY_MONEY_SUBQUERY + " ) as money " +
@@ -99,10 +99,9 @@ public class UserDAOImpl extends GenericDAOImpl<User> implements UserDao {
                 "from " +
                     "User as u " +
                     "join u.role as r " +
-                    "join u.orders as o " +
+                    "join u.completedOrders as o " +
                 "where " +
                     "r.id = :role and " +
-                    "o.accept = true and " +
                     "o.dateDeliveredOrder between :from and :to";
         if (name != null && !"".equals(name))
             SUM_MONEY_BY_CUSTOMER = SUM_MONEY_BY_CUSTOMER + " and u.name like :name";
@@ -166,5 +165,13 @@ public class UserDAOImpl extends GenericDAOImpl<User> implements UserDao {
                 .where(predicates.toArray(new Predicate[]{}));
         Object count = createQuery(q).getSingleResult();
         return count != null ? (long)count : 0;
+    }
+
+    @Override
+    public void updateUserBalance(BigDecimal balance, Role role) {
+        createQuery("update User set balance = :balance where role = :role")
+                .setParameter("balance", balance)
+                .setParameter("role", role)
+                .executeUpdate();
     }
 }

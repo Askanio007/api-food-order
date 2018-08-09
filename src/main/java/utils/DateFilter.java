@@ -71,12 +71,12 @@ public class DateFilter {
         return (Date)to.clone();
     }
 
-    public static DateFilter currentCashPeriod() {
-        return new DateFilter(firstDayCurrentCashPeriod(),lastDayCurrentCashPeriod());
+    public static DateFilter currentCashPeriod(int day) {
+        return new DateFilter(firstDayCurrentCashPeriod(day),lastDayCurrentCashPeriod(day));
     }
 
-    public static DateFilter lastCashPeriod() {
-        return new DateFilter(firstDayLastCashPeriod(),lastDayLastCashPeriod());
+    public static DateFilter lastCashPeriod(int day) {
+        return new DateFilter(firstDayLastCashPeriod(day),lastDayLastCashPeriod(day));
     }
 
     public static DateFilter generateDateFilter(ReportFilters reportFilters) {

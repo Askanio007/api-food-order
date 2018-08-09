@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Entity
+@Entity(name = "CompletedOrderItem")
 @Table(name = "order_completed_item")
 @Getter
 @Setter
@@ -38,7 +38,7 @@ public class CompletedOrderItem {
     @Column(name = "type")
     private String type;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "completed_order_id")
     private CompletedOrder completedOrder;
 
@@ -49,7 +49,7 @@ public class CompletedOrderItem {
         this.name = food.getName();
         this.productCode = food.getProductCode();
         this.price = food.getPrice();
-        this.type = food.getType().getType().name();
+        this.type = food.getType().getType();
         this.completedOrder = order;
     }
 

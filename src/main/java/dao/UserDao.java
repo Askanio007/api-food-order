@@ -2,6 +2,7 @@ package dao;
 
 
 import entity.AutoOrder;
+import entity.Role;
 import entity.User;
 import models.reports.ReportByTodayOrder;
 import models.reports.ReportUserByMoney;
@@ -32,4 +33,6 @@ public interface UserDao extends GenericDao<User> {
     long countAllCustomer(String name);
 
     long countAll(String login, long roleId);
+
+    void updateUserBalance(BigDecimal balance, Role role);
 }

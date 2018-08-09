@@ -32,7 +32,7 @@ public class MenuController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
-    @RequestMapping(value = "/", method = RequestMethod.GET, produces={"application/json; charset=UTF-8"})
+    @RequestMapping(method = RequestMethod.GET, produces={"application/json; charset=UTF-8"})
     public ResponseEntity<ResponseServer> menu() {
         if (menuService.todayMenuExist()) {
             return ResponseServer.OK(true, menuService.getTodayMenu());
@@ -44,7 +44,7 @@ public class MenuController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
-    @RequestMapping(value = "/", method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity<ResponseServer> addMenu(@RequestBody MenuDto menuDto) {
         Date date = new Date();
         if (menuDto.getDateAcceptOrderD().getTime() < date.getTime())

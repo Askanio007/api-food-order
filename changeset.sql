@@ -23,14 +23,16 @@ INSERT INTO transaction_status(id, status) VALUES (3, 'PAYMENT_ORDER');
 
 INSERT INTO user_fo(enabled, login, password, role_id, balance) VALUES (true, 'admin', crypt('123456', gen_salt('bf')), 1, 0.00);
 
+INSERT INTO setting(name, value) VALUES ('api', 'http://91.193.237.45:2000/FastOperator.asmx/AddOrder');
 INSERT INTO setting(name, value) VALUES ('city', 'Тула');
 INSERT INTO setting(name, value) VALUES ('street', 'Николая Руднева');
 INSERT INTO setting(name, value) VALUES ('house', '28а');
 INSERT INTO setting(name, value) VALUES ('floor', '3');
 INSERT INTO setting(name, value) VALUES ('flat', '31');
 INSERT INTO setting(name, value) VALUES ('phone', '9207471983');
-INSERT INTO setting(name, value) VALUES ('api', 'http://91.193.237.45:2000/FastOperator.asmx/AddOrder');
+INSERT INTO setting(name, value) VALUES ('userBalance', '6000');
 INSERT INTO setting(name, value) VALUES ('timeAttempt', '10');
+INSERT INTO setting(name, value) VALUES ('startAccountingPeriod', '20');
 
 
 UPDATE user_fo SET balance=0.00;

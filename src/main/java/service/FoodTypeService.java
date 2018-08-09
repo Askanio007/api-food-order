@@ -39,12 +39,42 @@ public class FoodTypeService {
     }
 
     @Transactional
+    public List<FoodTypeDto> getAllFoodTypesDto() {
+        return FoodTypeDto.convertToDtos(foodTypeDao.find());
+    }
+
+    @Transactional
     public List<FoodTypeDto> getAllTypes() {
         return FoodTypeDto.convertToDtos(foodTypeDao.find());
     }
 
     @Transactional
-    public FoodType find(enums.FoodType type) {
+    public FoodTypeDto get(String type) {
+        return FoodTypeDto.convertToDto(foodTypeDao.find(type));
+    }
+
+    @Transactional
+    protected FoodType find(String type) {
         return foodTypeDao.find(type);
+    }
+
+    @Transactional
+    public FoodType find(long id) {
+        return foodTypeDao.find(id);
+    }
+
+    @Transactional
+    public List<FoodTypeDto> listPermanentTypes() {
+        return FoodTypeDto.convertToDtos(foodTypeDao.listPermanentTypes());
+    }
+
+    @Transactional
+    public List<FoodTypeDto> listComboTypes() {
+        return FoodTypeDto.convertToDtos(foodTypeDao.listComboTypes());
+    }
+
+    @Transactional
+    public void save(FoodType type) {
+        foodTypeDao.save(type);
     }
 }

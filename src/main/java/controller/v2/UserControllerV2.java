@@ -5,6 +5,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import models.Password;
 import models.filters.UserListFilters;
 import models.responseServer.ResponseServer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,7 @@ public class UserControllerV2 {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET)
     public ResponseEntity<ResponseServer> profile() {
         return ResponseServer.OK(true, userService.find(getCurrentUserLogin()));
     }
@@ -110,5 +111,21 @@ public class UserControllerV2 {
     public ResponseEntity<ResponseServer> activatedUser(@RequestBody long id) {
         userService.activatedUser(id);
         return ResponseServer.OK(true, "user was activated");
+    }
+
+    @ApiOperation(value = "Изменение пароля")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
+    })
+    @RequestMapping(value = "/password/change", method = RequestMethod.POST)
+    public ResponseEntity<ResponseServer> changePassword(@RequestBody @Valid Password password, BindingResult result) {
+        if(result.hasErrors()) {
+            return ResponseServer.OK(false, "Некорректный новый пароль");
+        }
+        if (!password.getNewPassword().equals(password.getConfirmNewPassword())) {
+            return ResponseServer.OK(false, "Пароли не совпадают");
+        }
+        userService.changePassword(password.getUserId(), password.getNewPassword());
+        return ResponseServer.OK(true, "Пароль успешно изменён");
     }
 }

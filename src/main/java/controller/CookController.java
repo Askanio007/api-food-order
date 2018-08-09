@@ -3,7 +3,9 @@ package controller;
 import config.answerServer.AnswerServer;
 import config.answerServer.ErrorAnswer;
 import config.answerServer.SuccessAnswer;
+import dto.CompletedOrderItemDto;
 import dto.FoodDto;
+import dto.FoodTypeDto;
 import dto.MenuDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -50,7 +52,7 @@ public class CookController {
     }
 
     @RequestMapping(value = "/rest/cook/getFoodsByOrder/{id}", method = RequestMethod.GET)
-    public List<FoodDto> foodsByOrder(@PathVariable("id") long id) {
+    public List<CompletedOrderItemDto> foodsByOrder(@PathVariable("id") long id) {
         return foodService.findById(id);
     }
 
@@ -84,6 +86,11 @@ public class CookController {
         return foodTypeService.getFoodTypes();
     }
 
+    @RequestMapping(value = "/rest/food/allTypesDto", method = RequestMethod.GET)
+    public List<FoodTypeDto> allTypesDto() {
+        return foodTypeService.getAllFoodTypesDto();
+    }
+
     @RequestMapping(value = "/rest/food/allTypes", method = RequestMethod.GET)
     public List<String> allTypes() {
         return foodTypeService.getAllFoodTypes();
@@ -112,6 +119,12 @@ public class CookController {
             return new ResponseEntity<>(new ErrorAnswer(HttpStatus.OK, "Food not edited!", result.getFieldErrors()), HttpStatus.OK);
         foodService.editFood(food);
         return new ResponseEntity<>(new SuccessAnswer(HttpStatus.OK, "Food was edited!"), HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/rest/addmamamia", method = RequestMethod.GET)
+    public String foodPrice() throws Exception {
+        foodService.addFoodFromProvider();
+        return "ok";
     }
 
 }

@@ -1,7 +1,7 @@
 package controller;
 
 import converter.MoneyToString;
-import dto.OrderDto;
+import dto.CompletedOrderDto;
 import models.filters.ReportFilters;
 import models.reports.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,13 +33,24 @@ public class ReportController {
 
     @RequestMapping(value = "/rest/report/defaultTimePeriod", method = RequestMethod.GET)
     public DateFilter defaultTimePeriod() {
-        return DateFilter.currentCashPeriod();
+        return reportService.defaultCashPeriod();
     }
 
     @RequestMapping(value = "/rest/report/lastTimePeriod", method = RequestMethod.GET)
     public DateFilter lastTimePeriod() {
-        return DateFilter.lastCashPeriod();
+        return reportService.lastCashPeriod();
     }
+
+    @RequestMapping(value = "/rest/report/prevCashPeriod", method = RequestMethod.POST)
+    public DateFilter prevCashPeriod(@RequestBody Date date) {
+        return reportService.getPrevCashPeriod(date);
+    }
+
+    @RequestMapping(value = "/rest/report/nextCashPeriod", method = RequestMethod.POST)
+    public DateFilter nextCashPeriod(@RequestBody Date date) {
+        return reportService.getNextCashPeriod(date);
+    }
+
 
     // Today orders
     @RequestMapping(value = "/rest/todayOrderActive", method = RequestMethod.GET)
@@ -69,57 +80,43 @@ public class ReportController {
 
 
     //By Sum Orders
-    @RequestMapping(value = "/rest/report/bySumOrder", method = RequestMethod.GET)
-    public List<ReportOrderPriceByDate> bySumOrder() {
-        return reportService.getOrderPriceByDate(DateFilter.currentCashPeriod(), PaginationFilter.defaultPagination());
-    }
-
-    @RequestMapping(value = "/rest/report/countBySumOrder", method = RequestMethod.GET)
-    public long countBySumOrder() {
-        return reportService.getCountOrderPriceByDate(DateFilter.currentCashPeriod());
-    }
 
     @RequestMapping(value = "/rest/report/bySumOrder", method = RequestMethod.POST)
-    public List<ReportOrderPriceByDate> bySumOrder(@RequestBody ReportFilters reportFilters) {
+    public List<ReportOrderPriceByDate> bySumOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return reportService.getOrderPriceByDate(reportService.defaultCashPeriod(), PaginationFilter.defaultPagination());
         return reportService.getOrderPriceByDate(DateFilter.generateDateFilter(reportFilters), reportFilters.getPaginationFilter());
     }
 
     @RequestMapping(value = "/rest/report/countBySumOrder", method = RequestMethod.POST)
-    public long countBySumOrder(@RequestBody ReportFilters reportFilters) {
+    public long countBySumOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return reportService.getCountOrderPriceByDate(reportService.defaultCashPeriod());
         return reportService.getCountOrderPriceByDate(DateFilter.generateDateFilter(reportFilters));
     }
 
-    @RequestMapping(value = "/rest/report/amountSumOrder", method = RequestMethod.GET)
-    public String amountSumOrder() {
-        return MoneyToString.convert(reportService.getAmountOrderPriceByDate(DateFilter.currentCashPeriod()));
-    }
-
     @RequestMapping(value = "/rest/report/amountSumOrder", method = RequestMethod.POST)
-    public String amountSumOrder(@RequestBody ReportFilters reportFilters) {
+    public String amountSumOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return MoneyToString.convert(reportService.getAmountOrderPriceByDate(reportService.defaultCashPeriod()));
         return MoneyToString.convert(reportService.getAmountOrderPriceByDate(DateFilter.generateDateFilter(reportFilters)));
     }
 
 
     //Detail By Order
 
-    @RequestMapping(value = "/rest/report/countDetailByOrder", method = RequestMethod.GET)
-    public long countDetailByOrder() {
-        return orderService.countOrderByDate(DateFilter.currentCashPeriod());
-    }
-
     @RequestMapping(value = "/rest/report/countDetailByOrder", method = RequestMethod.POST)
-    public long countDetailByOrder(@RequestBody ReportFilters reportFilters) {
-        return orderService.countOrderByDate(DateFilter.generateDateFilter(reportFilters));
-    }
-
-    @RequestMapping(value = "/rest/report/detailByOrder", method = RequestMethod.GET)
-    public List<OrderDto> DetailByOrder() {
-        return orderService.findByDate(DateFilter.currentCashPeriod(), PaginationFilter.defaultPagination());
+    public long countDetailByOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return reportService.countOrderByDate(reportService.defaultCashPeriod());
+        return reportService.countOrderByDate(DateFilter.generateDateFilter(reportFilters));
     }
 
     @RequestMapping(value = "/rest/report/detailByOrder", method = RequestMethod.POST)
-    public List<OrderDto> DetailByOrder(@RequestBody ReportFilters reportFilters) {
-        return orderService.findByDate(DateFilter.generateDateFilter(reportFilters), reportFilters.getPaginationFilter());
+    public List<CompletedOrderDto> DetailByOrder(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return reportService.findByDate(reportService.defaultCashPeriod(), PaginationFilter.defaultPagination());
+        return reportService.findByDate(DateFilter.generateDateFilter(reportFilters), reportFilters.getPaginationFilter());
     }
 
 
@@ -137,7 +134,7 @@ public class ReportController {
 
     @RequestMapping(value = "/rest/report/currentBySumOrder", method = RequestMethod.GET)
     public List<ReportOrderPriceByDate> currentBySumOrder() {
-        return reportService.getOrderPriceByDate(DateFilter.currentCashPeriod(), PaginationFilter.defaultPagination());
+        return reportService.getOrderPriceByDate(reportService.defaultCashPeriod(), PaginationFilter.defaultPagination());
     }
 
     @RequestMapping(value = "/rest/report/amountSumCurrentBySumOrder", method = RequestMethod.GET)
@@ -160,23 +157,18 @@ public class ReportController {
 
 
     // Manager report
-    @RequestMapping(value = "/rest/report/customerByMoney", method = RequestMethod.GET)
-    public List<ReportUserByMoney> customerByMoney() {
-        return userService.customerByMoney(new ReportFilters(PaginationFilter.defaultPagination()));
-    }
 
     @RequestMapping(value = "/rest/report/customerByMoney", method = RequestMethod.POST)
-    public List<ReportUserByMoney> customerByMoney(@RequestBody ReportFilters reportFilters) {
+    public List<ReportUserByMoney> customerByMoney(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return userService.customerByMoney(new ReportFilters(PaginationFilter.defaultPagination()));
         return userService.customerByMoney(reportFilters);
     }
 
-    @RequestMapping(value = "/rest/report/amountSumCustomerByMoney", method = RequestMethod.GET)
-    public String amountSumCustomerByMoney() {
-        return MoneyToString.convert(userService.amountSumCustomerByMoney(new ReportFilters(PaginationFilter.defaultPagination())));
-    }
-
     @RequestMapping(value = "/rest/report/amountSumCustomerByMoney", method = RequestMethod.POST)
-    public String amountSumCustomerByMoney(@RequestBody ReportFilters reportFilters) {
+    public String amountSumCustomerByMoney(@RequestBody(required = false) ReportFilters reportFilters) {
+        if (reportFilters == null)
+            return MoneyToString.convert(userService.amountSumCustomerByMoney(new ReportFilters(PaginationFilter.defaultPagination())));
         return MoneyToString.convert(userService.amountSumCustomerByMoney(reportFilters));
     }
 
@@ -186,31 +178,9 @@ public class ReportController {
     }
 
 
-    //User report
-
-    @RequestMapping(value = "/rest/customer/bySumOrderByUser", method = RequestMethod.GET)
-    public List<ReportOrderPriceByDate> bySumOrderForUser() {
-        return reportService.getOrderPriceByDate(DateFilter.currentCashPeriod(), getCurrentUserName(), PaginationFilter.defaultPagination());
-    }
-
-    @RequestMapping(value = "/rest/customer/bySumOrderByUser", method = RequestMethod.POST)
-    public List<ReportOrderPriceByDate> bySumOrderForUser(@RequestBody ReportFilters reportFilters) {
-        return reportService.getOrderPriceByDate(DateFilter.generateDateFilter(reportFilters), getCurrentUserName(), reportFilters.getPaginationFilter());
-    }
-
-    @RequestMapping(value = "/rest/customer/detailByOrderByUser", method = RequestMethod.GET)
-    public List<OrderDto> detailByOrderForUser() {
-        return orderService.findByDate(DateFilter.currentCashPeriod(), getCurrentUserName(), PaginationFilter.defaultPagination());
-    }
-
-    @RequestMapping(value = "/rest/customer/detailByOrderByUser", method = RequestMethod.POST)
-    public List<OrderDto> detailByOrderForUser(@RequestBody ReportFilters reportFilters) {
-        return orderService.findByDate(DateFilter.generateDateFilter(reportFilters), getCurrentUserName(), reportFilters.getPaginationFilter());
-    }
-
     // detail
     @RequestMapping(value = "/rest/report/detailByDay", method = RequestMethod.POST)
-    public List<ReportByNameFood> detailByDay(@RequestBody Date date) throws Exception {
+    public List<ReportByNameFood> detailByDay(@RequestBody Date date) {
         return reportService.getReportByNameFood(date);
     }
 

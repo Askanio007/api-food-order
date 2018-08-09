@@ -1,16 +1,25 @@
 package service;
 
 import dao.FoodDao;
+import dto.CompletedOrderItemDto;
 import dto.FoodDto;
+import dto.FoodTypeDto;
 import dto.MenuDto;
+import entity.CompletedOrderItem;
 import entity.Food;
+import entity.FoodType;
 import enums.StatusOrder;
+import models.xmlProviderMenu.Category;
+import models.xmlProviderMenu.Product;
+import models.xmlProviderMenu.XmlMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import enums.FoodType;
 
 import javax.transaction.Transactional;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,10 +44,10 @@ public class FoodService {
     @Transactional
     public void add(FoodDto foodDto) {
         boolean available = false;
-        FoodType type = FoodType.getType(foodDto.getType());
-        if (type == FoodType.OTHER)
+        FoodTypeDto type = foodTypeService.get(foodDto.getType());
+        if (!type.isCombo())
             available = true;
-        Food food = new Food(foodDto.getName(), foodDto.getPrice(), foodTypeService.find(type), available, foodDto.getProductCode());
+        Food food = new Food(foodDto.getName(), foodDto.getPrice(), foodTypeService.find(type.getId()), available, foodDto.getProductCode());
         foodDao.save(food);
     }
 
@@ -73,9 +82,9 @@ public class FoodService {
     }
 
     @Transactional
-    public List<FoodDto> findById(long orderId) {
-        List<Food> foods = foodDao.findById(orderId);
-        return foods != null ? FoodDto.convertToDto(foods) : null;
+    public List<CompletedOrderItemDto> findById(long orderId) {
+        List<CompletedOrderItem> foods = foodDao.findById(orderId);
+        return foods != null ? CompletedOrderItemDto.convertToDto(foods) : null;
     }
 
     @Transactional
@@ -86,6 +95,9 @@ public class FoodService {
 
     @Transactional
     public List<FoodDto> findAvailable(String type) {
+        FoodTypeDto typeDto = foodTypeService.get(type);
+        if (typeDto.isCombo())
+            return FoodDto.listByType(menuService.getTodayMenu().getFoods(), type);
         List<Food> foods = foodDao.findAvailable(type);
         return foods != null ? FoodDto.convertToDto(foods) : null;
     }
@@ -106,7 +118,7 @@ public class FoodService {
         food.setAvailableEveryDay(foodDto.isAvailable());
         food.setName(foodDto.getName());
         food.setPrice(foodDto.getPrice());
-        food.setType(foodTypeService.find(FoodType.getType(foodDto.getType())));
+        food.setType(foodTypeService.find(foodDto.getType()));
         food.setProductCode(foodDto.getProductCode());
         foodDao.update(food);
     }
@@ -138,5 +150,35 @@ public class FoodService {
     @Transactional
     public void updateFood(Food food) {
         foodDao.update(food);
+    }
+
+    @Transactional
+    public void addFoodFromProvider() throws Exception {
+        File file = new File("D:\\file.xml");
+        JAXBContext jaxbContext = JAXBContext.newInstance(XmlMenu.class);
+        Unmarshaller un = jaxbContext.createUnmarshaller();
+        XmlMenu menu = (XmlMenu) un.unmarshal(file);
+        for (Category cat : menu.getDelivery_service().getCategories().getCategory()) {
+            FoodType d = foodTypeService.find(cat.getValue());
+            if (d == null) {
+                foodTypeService.save(new FoodType(cat.getValue(), false));
+            }
+        }
+        for(Product prod : menu.getDelivery_service().getProducts().getProduct()) {
+            Food f = new Food(prod.getName().getValue(),
+                    new BigDecimal(prod.getPrice().getValue()),
+                    foodTypeService.find(type(prod.getCategory_id().getValue(), menu.getDelivery_service().getCategories().getCategory())),
+                    true,
+                    prod.getId());
+            foodDao.save(f);
+        }
+    }
+
+    private String type(String id, Collection<Category> categories) {
+        for (Category c : categories) {
+            if (c.getId().equals(id))
+                return c.getValue();
+        }
+        return null;
     }
 }

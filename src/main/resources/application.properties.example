@@ -1,0 +1,14 @@
+#camel
+#db.url=jdbc:postgresql://localhost:5432/food
+#db.username=fooduser
+#db.password=eew9jaekuamiePeibo6x
+
+#local
+db.url=jdbc:postgresql://localhost:5432/food_order
+db.username=postgres
+db.password=12332155
+
+#hiroku
+#db.url=jdbc:postgresql://ec2-54-217-208-52.eu-west-1.compute.amazonaws.com:5432/d8i30hqsab72ta
+#db.username=pragasinetdiej
+#db.password=711f550315ca3d32e1decd0b42b7239b3f94079ad0a7ddb70a59616847142a5e
