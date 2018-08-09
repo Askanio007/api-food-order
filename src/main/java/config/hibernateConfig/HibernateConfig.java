@@ -18,14 +18,14 @@ import java.util.Properties;
 @PropertySource("classpath:application.properties")
 public class HibernateConfig {
 
-    //@Value("${db.url}")
-    private String dbUrl = "jdbc:postgresql://localhost:5432/food";
+    @Value("${db.url}")
+    private String dbUrl;// = "jdbc:postgresql://localhost:5432/food";
 
-    //@Value("${db.username}")
-    private String dbUsername = "fooduser";
+    @Value("${db.username}")
+    private String dbUsername;// = "fooduser";
 
-    //@Value("${db.password}")
-    private String dbPassword = "eew9jaekuamiePeibo6x";
+    @Value("${db.password}")
+    private String dbPassword;// = "eew9jaekuamiePeibo6x";
 
         @Bean(name = "dataSource")
            public DataSource getDataSource() {
