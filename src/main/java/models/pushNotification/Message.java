@@ -1,9 +1,11 @@
 package models.pushNotification;
 
 import converter.DateConverter;
+import dto.ProviderOrderDto;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -17,7 +19,7 @@ public class Message {
 
     private Message(){
         this.icon = "https://cdn.lifehacker.ru/wp-content/uploads/2015/07/Depositphotos_9295917_original_1436784394.jpg";
-        this.click_action = "https://foodorder.tst.local/profile";
+        this.click_action = "https://k.solidsystems.ru/profile";
     }
 
     public static Message menuWasAdded(Date dateAcceptOrder) {
@@ -29,9 +31,32 @@ public class Message {
 
     public static Message tenMinutesLeft() {
         Message message = new Message();
-        message.setIcon("https://cdn.playbuzz.com/cdn/288c21e7-bf2e-4aa1-9ce6-644b9f42aeee/2ffea2ef-64ca-4e72-a0ea-2203cce89941_560_420.jpg");
         message.setTitle("Ты поторопись...");
-        message.body = "Время заказа закончится через 10 минут!";
+        message.setBody("Время заказа закончится через 10 минут!");
+        return message;
+    }
+
+    public static Message orderWasCreate(ProviderOrderDto providerOrderDto, BigDecimal allSumTodayOrder) {
+        Message message = new Message();
+        message.setTitle("Solid Systems отправили заказ");
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer
+                .append("ID заказа - ")
+                .append(providerOrderDto.getIdOrder())
+                .append(", Код - ")
+                .append(providerOrderDto.getCode())
+                .append(", Сумма - ")
+                .append(allSumTodayOrder.setScale(0).toString())
+                .append(" руб.");
+        message.setBody(stringBuffer.toString());
+        message.setClick_action("");
+        return message;
+    }
+
+    public static Message orderWasDelivered() {
+        Message message = new Message();
+        message.setTitle("Можно идти обедать!");
+        message.setBody("Сегодняшний заказ доставлен. Приятного аппетита!");
         return message;
     }
 }

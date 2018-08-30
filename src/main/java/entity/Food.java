@@ -52,7 +52,7 @@ public class Food {
     }
 
     public Food(String name, BigDecimal price, FoodType foodType, boolean available, String productCode) {
-        this.name = name;
+        this.name = name.trim();
         this.price = price;
         this.type = foodType;
         this.availableEveryDay = available;

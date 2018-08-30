@@ -23,4 +23,9 @@ public class FoodTypeDAOImpl extends GenericDAOImpl<FoodType> implements FoodTyp
         return (List<FoodType>)createQuery("select ft from FoodType as ft join ft.foods as food where food.active = true and ft.combo = true group by ft")
                 .list();
     }
+
+    @Override
+    public boolean typeExist(String type) {
+        return false;
+    }
 }

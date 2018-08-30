@@ -13,7 +13,10 @@ import models.xmlOrder.XMLOrder;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
+import scheduler.pushNotification.OrderWasDelivered;
+import utils.DateBuilder;
 import utils.DateFilter;
 import utils.PaginationFilter;
 
@@ -56,6 +59,13 @@ public class OrderService {
 
     @Autowired
     private ReportService reportService;
+
+    @Autowired
+    @Qualifier("myScheduler")
+    private TaskScheduler scheduler;
+
+    @Autowired
+    private OrderWasDelivered orderWasDelivered;
 
     private BigDecimal calculatePrice(Collection<Food> foods) {
         return foods.stream().map(Food::getPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -118,13 +128,14 @@ public class OrderService {
                 orderDao.update(order);
             });
             transactionService.paymentTransaction(sumOrder);
+            scheduler.schedule(orderWasDelivered, DateBuilder.addOneMinutes(today()));
         } catch (Exception e) {
             log.error("update orders or update balance is failed", e);
         }
     }
 
     @Transactional
-    protected BigDecimal sumTodayOrder() {
+    public BigDecimal sumTodayOrder() {
         BigDecimal sumMenuFood = orderDao.amountMoneyTodayOrders(foodTypeService.listComboTypes());
         BigDecimal sumOtherFood = orderDao.amountMoneyTodayOrders(foodTypeService.listPermanentTypes());
         BigDecimal sumOrder = sumMenuFood.add(sumOtherFood);
@@ -196,6 +207,7 @@ public class OrderService {
         XMLOrder order = new XMLOrder(countTodayOrder(), getXMLTodayProducts());
         order.setAddress(new Address(settingService.getCity(), settingService.getStreet(), settingService.getHouse(), settingService.getFlat(), settingService.getFloor()));
         order.setPhone(new Phone(settingService.getPhone()));
+        order.setPayMethod(settingService.getPayMethod());
         return order;
     }
 
@@ -209,6 +221,11 @@ public class OrderService {
             else
                 orderDao.update(order);
         });
+    }
+
+    @Transactional
+    public void orderWasDelivered() {
+        scheduler.schedule(orderWasDelivered, DateBuilder.addOneMinutes(today()));
     }
 
     /* Сказали убрать, пока не удаляю

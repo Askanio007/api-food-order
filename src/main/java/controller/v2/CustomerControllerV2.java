@@ -152,7 +152,7 @@ public class CustomerControllerV2 {
         return ResponseServer.OK(true, "order was edited");
     }
 
-    @ApiOperation(value = "Закрепление девайся пользователю для пуш уведомлений")
+    @ApiOperation(value = "Закрепление девайса пользователю для пуш уведомлений")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
     })
@@ -160,6 +160,16 @@ public class CustomerControllerV2 {
     public ResponseEntity<ResponseServer> saveDevice(@RequestBody String deviceId)  {
         userService.saveDevice(deviceId, getCurrentUserLogin());
         return ResponseServer.OK(true, "Device was added");
+    }
+
+    @ApiOperation(value = "Удаление девайса пользователю для пуш уведомлений")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
+    })
+    @RequestMapping(value = "/notification/device/delete", method = RequestMethod.POST)
+    public ResponseEntity<ResponseServer> deleteDevice(@RequestBody String deviceId)  {
+        userService.deleteDevice(deviceId, getCurrentUserLogin());
+        return ResponseServer.OK(true, "Device was deleted");
     }
 
     @ApiOperation(value = "Удаление заказа")

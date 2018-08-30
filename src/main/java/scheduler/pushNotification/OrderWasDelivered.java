@@ -1,4 +1,4 @@
-package scheduler;
+package scheduler.pushNotification;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 import service.MessageService;
 
 @Component
-public class NotifyAboutOrder implements Runnable {
+public class OrderWasDelivered implements Runnable {
 
-    private static final Logger log = Logger.getLogger(NotifyAboutOrder.class);
+    private static final Logger log = Logger.getLogger(OrderWasDelivered.class);
 
     @Autowired
     private MessageService messageService;
@@ -16,9 +16,9 @@ public class NotifyAboutOrder implements Runnable {
     @Override
     public void run() {
         try {
-            messageService.createNotificationAboutOrder();
+            messageService.orderWasDelivered();
         } catch (Exception e) {
-            log.error("Sending notify is failed", e);
+            log.error("Sending notify about send order to provider is failed", e);
         }
     }
 }

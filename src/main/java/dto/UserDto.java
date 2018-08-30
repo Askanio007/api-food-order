@@ -25,7 +25,7 @@ public class UserDto {
 
     private BigDecimal balance;
 
-    @Size(min = 6, max = 15)
+    @Size(min = 6, max = 15, message = "Пароль может содержать от 6 до 15 символов")
     private String password;
 
     private String name;
@@ -41,7 +41,6 @@ public class UserDto {
             this.name = user.getName();
             this.login = user.getLogin();
             this.balance = user.getBalance();
-            this.password = user.getPassword();
             this.balanceView = MoneyToString.convert(user.getBalance());
             this.role = RoleType.getRoleType(user.getRole().getRole());
         }

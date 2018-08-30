@@ -11,6 +11,8 @@ import service.*;
 
 import java.math.BigDecimal;
 
+import static controller.UserController.getCurrentUserName;
+
 @RestController
 @RequestMapping("/api")
 public class ManagerController {
@@ -20,6 +22,9 @@ public class ManagerController {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private DeviceService deviceService;
 
     @Autowired
     private MenuService menuService;
@@ -46,6 +51,11 @@ public class ManagerController {
         return userService.currentBalance();
     }
 
+    @RequestMapping(value = "/rest/user/isSubscribe", method = RequestMethod.GET)
+    public boolean isSubscribe() {
+        return deviceService.isSubscribe(getCurrentUserName());
+    }
+
     @RequestMapping(value = "/rest/deleteTodayMenu", method = RequestMethod.GET)
     public String deleteTodayMenu() {
         menuService.deleteMenu();
@@ -64,8 +74,15 @@ public class ManagerController {
         return new ResponseEntity<>("Task was created", HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/rest/orderWasDelivered", method = RequestMethod.GET)
+    public ResponseEntity<String> deliveredOrder() {
+        orderService.orderWasDelivered();
+        return new ResponseEntity<>("Notification was created", HttpStatus.OK);
+    }
+
     @RequestMapping(value = "/rest/responseProvider", method = RequestMethod.GET)
     public ProviderOrderDto responseProvider() {
         return providerOrdersService.getIdProviderOrder();
     }
+
 }

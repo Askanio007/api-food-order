@@ -1,7 +1,6 @@
 package converter;
 
 import models.xmlOrder.XMLOrder;
-import models.xmlProviderMenu.XmlMenu;
 import models.xmlProviderResponse.ProviderResponse;
 import org.apache.log4j.Logger;
 
@@ -14,7 +13,6 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
 import java.io.StringReader;
 import java.io.StringWriter;
 
@@ -55,5 +53,4 @@ public class XmlConverter {
             return null;
         }
     }
-
 }

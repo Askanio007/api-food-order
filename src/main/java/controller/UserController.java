@@ -55,7 +55,7 @@ public class UserController {
         if (u.getLogin() != null && password != null) {
             if (!u.isEnable())
                 return new ResponseEntity<>(new ErrorAnswer(HttpStatus.UNAUTHORIZED, "Not allowed", "user is not active"), HttpStatus.UNAUTHORIZED);
-            if (EncryptingString.getEncoder().matches(password, u.getPassword())) {
+            if (userService.passwordIsCorrect(login, password)) {
                 HttpHeaders headers = new HttpHeaders();
                 headers.add("Authorization", TokenUtil.generateToken(u));
                 return new ResponseEntity<>(new SuccessAnswer(HttpStatus.OK, "success", userService.find(login)), headers, HttpStatus.OK);

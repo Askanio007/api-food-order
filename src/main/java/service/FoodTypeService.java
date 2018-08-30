@@ -74,7 +74,17 @@ public class FoodTypeService {
     }
 
     @Transactional
-    public void save(FoodType type) {
+    public void save(FoodTypeDto type) {
+        save(new FoodType(type.getType(), type.isCombo()));
+    }
+
+    @Transactional
+    public boolean typeExist(String type) {
+        Object ob = find(type);
+        return (ob != null);
+    }
+
+    private void save(FoodType type) {
         foodTypeDao.save(type);
     }
 }

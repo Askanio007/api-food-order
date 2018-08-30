@@ -1,6 +1,7 @@
 package service;
 
 import entity.Device;
+import models.pushNotification.Message;
 import models.pushNotification.Notification;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,12 @@ public class MessageService {
     @Autowired
     private DeviceService deviceService;
 
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private ProviderOrdersService providerOrdersService;
+
     private void sendNotification(Notification notification) {
         if (notification == null) {
             log.info("Notification is null");
@@ -38,27 +45,25 @@ public class MessageService {
         HttpEntity<Notification> request = new HttpEntity<>(notification, headers);
         log.info("Send notification in firebase...");
         ResponseEntity<String> res = restTemplate.postForEntity(URL_FIREBASE, request, String.class);
-        log.info(res.getStatusCode());
-        log.info(res.getBody());
+        log.info("return code: " + res.getStatusCode());
     }
 
-    public void createNotificationAboutMenu(Date date) {
-        Notification notification = new Notification(date);
-        notification.addDevice(getDevice());
-        sendNotification(notification);
+    public void menuWasCreate(Date date) {
+        sendNotification(Notification.aboutMenu(date, deviceService.convertDevice(deviceService.getCustomerDevices())));
     }
 
-    public void createNotificationAboutOrder() {
-        Notification notification = new Notification();
-        notification.addDevice(getDevice());
-        sendNotification(notification);
+    public void smallTimeForOrder() {
+        sendNotification(Notification.aboutTimeOrder(deviceService.convertDevice(deviceService.getCustomerDevices())));
     }
 
-    private List<String> getDevice() {
-        List<Device> devices = deviceService.allDevices();
-        List<String> listDevice = new ArrayList<>();
-        devices.forEach(device -> listDevice.add(device.getDeviceId()));
-        return listDevice;
+    public void orderSendToProvider() {
+        sendNotification(Notification.orderWasCreate(providerOrdersService.getIdProviderOrder(), orderService.sumTodayOrder(), deviceService.convertDevice(deviceService.getCookDevices())));
     }
+
+    public void orderWasDelivered() {
+        sendNotification(Notification.orderWasDelivered(deviceService.convertDevice(deviceService.getCustomerDevices())));
+    }
+
+
 
 }

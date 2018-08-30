@@ -28,6 +28,7 @@ public class SettingService {
     private final String API_URL = "api";
     private final String USER_BALANCE = "userBalance";
     private final String START_ACCOUNTING_PERIOD = "startAccountingPeriod";
+    private final String PAY_METHOD = "payMethod";
 
     @Transactional
     protected Setting find(String name) {
@@ -63,6 +64,9 @@ public class SettingService {
             return settingDto.getValue();
         return "";
     }
+
+    @Transactional
+    public String getPayMethod() {return findValue(PAY_METHOD); }
 
     @Transactional
     public String getCountAttemptSending() {

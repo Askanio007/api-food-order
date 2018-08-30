@@ -1,7 +1,7 @@
 package config.securityConfig;
 
-import config.hibernateConfig.HibernateConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -19,19 +19,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@Import({TokenAuthenticationProvider.class,
-        TokenAuthenticationFilter.class,
-        RestAuthenticationEntryPoint.class})
+@Import({RestAuthenticationEntryPoint.class})
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private TokenAuthenticationProvider authProvider;
-
-    @Autowired
-    private TokenAuthenticationFilter tokenAuthenticationFilter;
-
-    @Autowired
     private RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+
+    @Autowired
+    private TokenAuthenticationProvider tknAuthenticationProvider;
 
     @Bean
     @Override
@@ -41,7 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     public void configAuthentication(AuthenticationManagerBuilder auth) {
-        auth.authenticationProvider(authProvider);
+        auth.authenticationProvider(tknAuthenticationProvider);
     }
 
 
@@ -49,6 +44,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
+
+    @Bean
+    public FilterRegistrationBean filterRegistrationBean() throws Exception {
+        FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
+        filterRegistrationBean.setEnabled(false);
+        filterRegistrationBean.setFilter(filter());
+        return filterRegistrationBean;
+    }
+
+    @Bean
+    public TokenAuthenticationFilter filter() { return new TokenAuthenticationFilter();}
 
     @Override
     public void configure(WebSecurity web) {
@@ -58,16 +64,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/api/rest/login",
                 "/api/v2/registration",
                 "/api/v2/login",
-                "/api/rest/addAutoOrder",
                 "/api/rest/deleteTodayMenu",
                 "/swagger-ui.html",
                 "/webjars/**",
                 "/swagger-resources/**",
                 "/swagger-ui.html/**",
                 "/swagger-ui.html#/**",
-                "/v2/api-docs",
-                "/api/rest/deleteTodayMenu",
-                "/api/rest/addmamamia");
+                "/v2/api-docs");
     }
 
     @Override
@@ -83,7 +86,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .logout().disable()
-                .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
+                .addFilterAfter(filter(), UsernamePasswordAuthenticationFilter.class);
     }
 }

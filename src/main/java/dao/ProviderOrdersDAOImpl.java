@@ -27,6 +27,6 @@ public class ProviderOrdersDAOImpl extends GenericDAOImpl<ProviderOrders> implem
         if (ob == null)
             return true;
         ProviderOrders po = (ProviderOrders) ob;
-        return !(po.getResponse() == null);
+        return !(po.getResponse() == null || po.getIdOrder() == null || po.getCodeOrder() == null || "".equals(po.getCodeOrder()) || "".equals(po.getIdOrder()));
     }
 }

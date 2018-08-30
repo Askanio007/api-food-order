@@ -10,10 +10,12 @@ import dto.OrderDto;
 import dto.UserDto;
 import enums.StatusOrder;
 import models.filters.ReportFilters;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import scheduler.SendOrderInFoodProvider;
 import service.*;
 
 import java.math.BigDecimal;
@@ -25,6 +27,8 @@ import static controller.UserController.getCurrentUserName;
 @RestController
 @RequestMapping("/api")
 public class CustomerController {
+
+    private static final Logger log = Logger.getLogger(CustomerController.class);
 
     private static final BigDecimal MONEY_LIMIT_OF_MONTH = new BigDecimal(6000.00);
 
@@ -72,14 +76,21 @@ public class CustomerController {
 
     @RequestMapping(value = "/rest/customer/createOrder", method = RequestMethod.POST)
     public ResponseEntity<String> addOrder(@RequestBody List<FoodDto> foods)  {
-        if (menuService.statusOrder() == StatusOrder.WAITING_DELIVERY)
+        if (menuService.statusOrder() == StatusOrder.WAITING_DELIVERY) {
+            log.error("menu was accepted. Create order is forbidden. USER: " + getCurrentUserName());
             return new ResponseEntity<>("menu was accepted. Create order is forbidden", HttpStatus.OK);
-        if (orderService.findToday(getCurrentUserName()) != null)
+        }
+        if (orderService.findToday(getCurrentUserName()) != null) {
+            log.error("menu was accepted. Create order is forbidden. USER: " + getCurrentUserName());
             return new ResponseEntity<>("order already exist", HttpStatus.OK);
+        }
         UserDto user = userService.find(getCurrentUserName());
-        if (orderService.calculatePriceOrder(foods).compareTo(user.getBalance()) > 0)
+        if (orderService.calculatePriceOrder(foods).compareTo(user.getBalance()) > 0) {
+            log.error("not enough money. USER: " + getCurrentUserName());
             return new ResponseEntity<>("not enough money", HttpStatus.OK);
+        }
         orderService.save(foods, getCurrentUserName());
+        log.info("order was created. USER: " + getCurrentUserName());
         return new ResponseEntity<>("order was created", HttpStatus.CREATED);
     }
 
@@ -124,10 +135,10 @@ public class CustomerController {
         return new ResponseEntity<>(new SuccessAnswer(HttpStatus.OK, "Device was added"), HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/rest/customer/testSendMessage", method = RequestMethod.GET)
-    public String testSendMessage() {
-        messageService.createNotificationAboutMenu(new Date());
-        return "ok";
+    @RequestMapping(value = "/rest/customer/deleteDeviceId", method = RequestMethod.POST)
+    public ResponseEntity<AnswerServer> deleteDevice(@RequestBody String deviceId)  {
+        userService.deleteDevice(deviceId, getCurrentUserName());
+        return new ResponseEntity<>(new SuccessAnswer(HttpStatus.OK, "Device was deleted"), HttpStatus.OK);
     }
 
     @RequestMapping(value = "/rest/customer/lastPeriodBalance", method = RequestMethod.GET)

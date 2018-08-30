@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 
-@Entity
+@Entity(name = "Device")
 @Table(name="device_user")
 @Getter
 @Setter

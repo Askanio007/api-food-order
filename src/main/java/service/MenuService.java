@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import converter.DateConverter;
-import scheduler.NotifyAboutMenu;
-import scheduler.NotifyAboutOrder;
+import scheduler.pushNotification.MenuWasCreate;
+import scheduler.pushNotification.SmallTimeForOrder;
 import scheduler.SendOrderInFoodProvider;
 import utils.DateBuilder;
 
@@ -38,10 +38,10 @@ public class MenuService {
     private SendOrderInFoodProvider sendOrderInFoodProvider;
 
     @Autowired
-    private NotifyAboutMenu notifyAboutMenu;
+    private MenuWasCreate menuWasCreate;
 
     @Autowired
-    private NotifyAboutOrder notifyAboutOrder;
+    private SmallTimeForOrder smallTimeForOrder;
 
     @Autowired
     private OrderService orderService;
@@ -84,8 +84,8 @@ public class MenuService {
         try {
             menuDao.save(menu);
             scheduler.schedule(sendOrderInFoodProvider, menuDto.getDateAcceptOrderD());
-            scheduler.schedule(notifyAboutOrder, DateBuilder.getTenMinutesBeforeOrder(menuDto.getDateAcceptOrderD()));
-            scheduler.schedule(notifyAboutMenu, DateBuilder.addOneMinutes(today()));
+            scheduler.schedule(smallTimeForOrder, DateBuilder.getTenMinutesBeforeOrder(menuDto.getDateAcceptOrderD()));
+            scheduler.schedule(menuWasCreate, DateBuilder.addOneMinutes(today()));
             //orderService.createAutoOrder();
             log.info("Task was created. Menu send in " + menuDto.getDateAcceptOrderD().toString());
         } catch (Exception e) {

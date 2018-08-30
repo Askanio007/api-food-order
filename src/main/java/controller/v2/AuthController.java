@@ -34,9 +34,7 @@ public class AuthController {
         }
         UserDto u = userService.find(login);
         if (u.getLogin() != null && password != null) {
-            if (!u.isEnable())
-                return ResponseServer.OK(false, "Not allowed", "User is not active");
-            if (EncryptingString.getEncoder().matches(password, u.getPassword())) {
+            if (userService.passwordIsCorrect(login, password)) {
                 return ResponseServer.authorized(userService.find(login));
             }
         }

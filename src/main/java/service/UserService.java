@@ -20,6 +20,7 @@ import utils.PaginationFilter;
 import javax.transaction.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Service
@@ -47,6 +48,15 @@ public class UserService {
 
     @Autowired
     private ReportService reportService;
+
+    @Autowired
+    private DeviceService deviceService;
+
+    @Transactional
+    public boolean passwordIsCorrect(String login, String hashPass) {
+        User user = get(login);
+        return EncryptingString.getEncoder().matches(hashPass, user.getPassword());
+    }
 
     @Transactional
     public List<ReportByTodayOrder> getReportByTodayOrder() {
@@ -256,11 +266,36 @@ public class UserService {
     @Transactional
     public void saveDevice(String deviceId, String userLogin) {
         User user = get(userLogin);
+        Device device = deviceService.find(deviceId, userLogin);
+        if (device == null) {
+            saveDevice(deviceId, user);
+            return;
+        }
+        if (!device.getUser().getId().equals(user.getId())) {
+            saveDevice(deviceId, user);
+        }
+    }
+
+    private void saveDevice(String deviceId, User user) {
         Device device = new Device(deviceId);
         device.setUser(user);
         user.getDevices().add(device);
         userDao.update(user);
     }
+
+    @Transactional
+    public void deleteDevice(String deviceId, String userLogin) {
+        Device device = deviceService.find(deviceId, userLogin);
+        if (device != null) {
+            User user = get(userLogin);
+            if (!user.getDevices().contains(device))
+                return;
+            user.getDevices().remove(device);
+            userDao.update(user);
+            deviceService.delete(device);
+        }
+    }
+
 
     @Transactional
     public void blockedUser(long id) {

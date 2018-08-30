@@ -9,9 +9,7 @@ import entity.CompletedOrderItem;
 import entity.Food;
 import entity.FoodType;
 import enums.StatusOrder;
-import models.xmlProviderMenu.Category;
-import models.xmlProviderMenu.Product;
-import models.xmlProviderMenu.XmlMenu;
+import models.xmlProviderMenu.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -21,9 +19,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class FoodService {
@@ -152,33 +148,4 @@ public class FoodService {
         foodDao.update(food);
     }
 
-    @Transactional
-    public void addFoodFromProvider() throws Exception {
-        File file = new File("D:\\file.xml");
-        JAXBContext jaxbContext = JAXBContext.newInstance(XmlMenu.class);
-        Unmarshaller un = jaxbContext.createUnmarshaller();
-        XmlMenu menu = (XmlMenu) un.unmarshal(file);
-        for (Category cat : menu.getDelivery_service().getCategories().getCategory()) {
-            FoodType d = foodTypeService.find(cat.getValue());
-            if (d == null) {
-                foodTypeService.save(new FoodType(cat.getValue(), false));
-            }
-        }
-        for(Product prod : menu.getDelivery_service().getProducts().getProduct()) {
-            Food f = new Food(prod.getName().getValue(),
-                    new BigDecimal(prod.getPrice().getValue()),
-                    foodTypeService.find(type(prod.getCategory_id().getValue(), menu.getDelivery_service().getCategories().getCategory())),
-                    true,
-                    prod.getId());
-            foodDao.save(f);
-        }
-    }
-
-    private String type(String id, Collection<Category> categories) {
-        for (Category c : categories) {
-            if (c.getId().equals(id))
-                return c.getValue();
-        }
-        return null;
-    }
 }

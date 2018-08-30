@@ -12,4 +12,6 @@ public interface FoodTypeDao extends GenericDao<FoodType> {
     List<FoodType> listPermanentTypes();
 
     List<FoodType> listComboTypes();
+
+    boolean typeExist(String type);
 }

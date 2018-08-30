@@ -6,19 +6,23 @@ import enums.RequestState;
 import models.xmlProviderResponse.ProviderResponse;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+import scheduler.pushNotification.OrderWasSendToProvider;
 import service.MenuService;
 import service.OrderService;
 import service.ProviderOrdersService;
 import service.SettingService;
+import utils.DateBuilder;
 
 import static utils.DateBuilder.today;
 
@@ -29,6 +33,13 @@ public class SendOrderInFoodProvider implements Runnable {
 
     @Autowired
     private MenuService menuService;
+
+    @Autowired
+    @Qualifier("myScheduler")
+    private TaskScheduler scheduler;
+
+    @Autowired
+    private OrderWasSendToProvider orderWasSendToProvider;
 
     @Autowired
     private SettingService settingService;
@@ -66,7 +77,6 @@ public class SendOrderInFoodProvider implements Runnable {
             providerOrdersService.save(po);
             ResponseEntity<String> res = sendingOrder(Integer.parseInt(settingService.getCountAttemptSending()), settingService.getApiUrl(), createRequest(order));
             if (res != null) {
-                po.setRequestState(RequestState.COMPLETE);
                 po.setResponse(res.getBody());
                 ProviderResponse providerResponse = XmlConverter.stringToXml(res.getBody().replace("&lt;", "<").replace("&gt;", ">"));
                 if (providerResponse != null) {
@@ -77,11 +87,16 @@ public class SendOrderInFoodProvider implements Runnable {
                 }
                 menuService.deactivateTodayMenu();
                 log.info("Sending completed successfully!");
+                po.setRequestState(RequestState.COMPLETE);
+                if (po.getCodeOrder() == null || "".equals(po.getIdOrder()) || "".equals(po.getCodeOrder()) || po.getIdOrder() == null)
+                    po.setRequestState(RequestState.FAILED);
             }
             else {
                 po.setRequestState(RequestState.FAILED);
                 log.info("Mama mia don't send response");
             }
+            if (po.getRequestState() != RequestState.FAILED)
+                scheduler.schedule(orderWasSendToProvider, DateBuilder.addOneMinutes(today()));
             providerOrdersService.save(po);
         } catch (Exception e) {
             log.error("Sending is failed", e);

@@ -96,6 +96,16 @@ public class AdminController {
         return new ResponseEntity<>(new SuccessAnswer(HttpStatus.OK, "user was blocked"), HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/rest/type/add", method = RequestMethod.POST)
+    public ResponseEntity<AnswerServer> addTypes(@RequestBody @Valid FoodTypeDto foodTypeDto, BindingResult result) {
+        if (result.hasErrors())
+            return new ResponseEntity<>(new ErrorAnswer(HttpStatus.BAD_REQUEST, "type is empty", result.getAllErrors()), HttpStatus.BAD_REQUEST);
+        if(foodTypeService.typeExist(foodTypeDto.getType()))
+            return new ResponseEntity<>(new ErrorAnswer(HttpStatus.BAD_REQUEST, "type already exist", result.getAllErrors()), HttpStatus.BAD_REQUEST);
+        foodTypeService.save(foodTypeDto);
+        return new ResponseEntity<>(new SuccessAnswer(HttpStatus.OK, "type was added"), HttpStatus.OK);
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = "/rest/activatedUser")
     public ResponseEntity<AnswerServer> activatedUser(@RequestBody long id) {
         userService.activatedUser(id);

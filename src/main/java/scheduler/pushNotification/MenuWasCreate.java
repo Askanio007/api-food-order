@@ -1,4 +1,4 @@
-package scheduler;
+package scheduler.pushNotification;
 
 import dto.MenuDto;
 import org.apache.log4j.Logger;
@@ -8,9 +8,9 @@ import service.MenuService;
 import service.MessageService;
 
 @Component
-public class NotifyAboutMenu implements Runnable {
+public class MenuWasCreate implements Runnable {
 
-    private static final Logger log = Logger.getLogger(NotifyAboutMenu.class);
+    private static final Logger log = Logger.getLogger(MenuWasCreate.class);
 
     @Autowired
     private MessageService messageService;
@@ -22,9 +22,9 @@ public class NotifyAboutMenu implements Runnable {
     public void run() {
         try {
             MenuDto menuDto = menuService.getTodayMenu();
-            messageService.createNotificationAboutMenu(menuDto.getDateAcceptOrderD());
+            messageService.menuWasCreate(menuDto.getDateAcceptOrderD());
         } catch (Exception e) {
-            log.error("Sending notify is failed", e);
+            log.error("Sending notify about create menu is failed", e);
         }
     }
 }

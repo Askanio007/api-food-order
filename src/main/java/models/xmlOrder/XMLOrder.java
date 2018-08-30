@@ -78,7 +78,6 @@ public class XMLOrder {
     public XMLOrder() {}
 
     public XMLOrder(long qtyPerson, Products products) {
-        this.payMethod = "100001";
         this.type = 1;
         this.payStateID = 1;
         this.qtyPerson = qtyPerson;

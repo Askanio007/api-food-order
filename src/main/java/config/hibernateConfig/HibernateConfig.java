@@ -5,7 +5,6 @@ import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.orm.hibernate5.HibernateTransactionManager;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBuilder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -15,17 +14,16 @@ import java.util.Properties;
 
 @Configuration
 @EnableTransactionManagement
-@PropertySource("classpath:application.properties")
 public class HibernateConfig {
 
     @Value("${db.url}")
-    private String dbUrl;// = "jdbc:postgresql://localhost:5432/food";
+    private String dbUrl;
 
     @Value("${db.username}")
-    private String dbUsername;// = "fooduser";
+    private String dbUsername;
 
     @Value("${db.password}")
-    private String dbPassword;// = "eew9jaekuamiePeibo6x";
+    private String dbPassword;
 
         @Bean(name = "dataSource")
            public DataSource getDataSource() {
@@ -54,7 +52,8 @@ public class HibernateConfig {
         Properties properties = new Properties();
         properties.put("hibernate.show_sql", "true");
         properties.put("hibernate.dialect", "org.hibernate.dialect.PostgreSQL94Dialect");
-        properties.put("hibernate.hbm2ddl.auto", "update");
+        properties.put("hibernate.jdbc.lob.non_contextual_creation", "true");
+        //properties.put("hibernate.hbm2ddl.auto", "update");
         properties.put("hibernate.format_sql", "true");
         return properties;
     }

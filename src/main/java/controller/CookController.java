@@ -120,11 +120,4 @@ public class CookController {
         foodService.editFood(food);
         return new ResponseEntity<>(new SuccessAnswer(HttpStatus.OK, "Food was edited!"), HttpStatus.OK);
     }
-
-    @RequestMapping(value = "/rest/addmamamia", method = RequestMethod.GET)
-    public String foodPrice() throws Exception {
-        foodService.addFoodFromProvider();
-        return "ok";
-    }
-
 }

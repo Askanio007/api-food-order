@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
+import service.DeviceService;
 import service.UserService;
 import utils.PaginationFilter;
 
@@ -28,6 +29,9 @@ public class UserControllerV2 {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private DeviceService deviceService;
 
     protected static String getCurrentUserLogin() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
@@ -78,21 +82,6 @@ public class UserControllerV2 {
         return ResponseServer.OK(true, userService.findAll(PaginationFilter.defaultPagination()));
     }
 
-    @ApiOperation(value = "Добавление")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
-    })
-    @RequestMapping(method = RequestMethod.POST, value = "/add")
-    public ResponseEntity<ResponseServer> addUser(@RequestBody @Valid UserDto userDto, BindingResult result) {
-        if (result.hasErrors()) {
-            return ResponseServer.OK(false, "add was failed", result.getAllErrors());
-        }
-        if (userService.isLoginExist(userDto.getLogin()))
-            return ResponseServer.OK(false, "user already exist", result.getAllErrors());
-        userService.createUser(userDto);
-        return ResponseServer.OK(true, "add was successful");
-    }
-
     @ApiOperation(value = "Заблокировать")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
@@ -127,5 +116,14 @@ public class UserControllerV2 {
         }
         userService.changePassword(password.getUserId(), password.getNewPassword());
         return ResponseServer.OK(true, "Пароль успешно изменён");
+    }
+
+    @ApiOperation(value = "Подписка на пуш-уведомления")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "token", value = "token", required = true, dataType = "string", paramType = "header"),
+    })
+    @RequestMapping(method = RequestMethod.GET, value = "/isSubscribe")
+    public ResponseEntity<ResponseServer> isSubscribe() {
+        return ResponseServer.OK(true, deviceService.isSubscribe(getCurrentUserLogin()));
     }
 }

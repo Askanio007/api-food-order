@@ -32,7 +32,7 @@ public class FoodType {
     }
 
     public FoodType(String type, boolean isCombo) {
-        this.combo = combo;
+        this.combo = isCombo;
         this.type = type;
     }
 

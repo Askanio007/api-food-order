@@ -19,7 +19,6 @@ import java.io.IOException;
 
 import static converter.JsonConverter.objectToJson;
 
-@Component
 public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     @Autowired
@@ -35,7 +34,7 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
     }
 
     @Override
-    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException, ServletException {
+    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException {
         String token = request.getHeader("Authorization");
         if (token != null) {
             UserDto u = TokenUtil.parseToken(token);
@@ -47,6 +46,10 @@ public class TokenAuthenticationFilter extends AbstractAuthenticationProcessingF
                 if (userService.userIsActive(u.getLogin())) {
                     TokenAuthentication authRequest = new TokenAuthentication(token, u);
                     return getAuthenticationManager().authenticate(authRequest);
+                } else {
+                    response.getWriter().append(objectToJson(ResponseServer.OK(true, "user not active", userService.find(u.getLogin()))));
+                    response.setStatus(200);
+                    return null;
                 }
             }
         }
