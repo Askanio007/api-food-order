@@ -1,1 +1,1 @@
-web: java $JAVA_OPTS -jar target/FoodOrder.jar --port $PORT
+web: java -jar target/FoodOrder.jar
